@@ -11,9 +11,11 @@ import javax.swing.JPanel;
 
 import com.samskivert.swing.HGroupLayout;
 import com.samskivert.swing.MultiLineLabel;
+import com.samskivert.swing.ScrollBox;
 import com.samskivert.swing.VGroupLayout;
 import com.samskivert.swing.util.SwingUtil;
 
+import com.threerings.media.VirtualRangeModel;
 import com.threerings.util.MessageBundle;
 
 import com.threerings.crowd.client.PlacePanel;
@@ -30,6 +32,9 @@ import static com.samskivert.scrack.data.ScrackCodes.*;
  */
 public class ScrackPanel extends PlacePanel
 {
+    /** Displays the main game visualization. */
+    public ScrackBoardView view;
+
     /**
      * Creates the panel and its associated interface components.
      */
@@ -47,7 +52,7 @@ public class ScrackPanel extends PlacePanel
 	setLayout(gl);
 
         // create and add the board view
-        add(_bview = new ScrackBoardView(ctx)); 
+        add(view = new ScrackBoardView(ctx)); 
 
         // create our side panel
         VGroupLayout sgl = new VGroupLayout(VGroupLayout.STRETCH);
@@ -64,6 +69,14 @@ public class ScrackPanel extends PlacePanel
 
 //         // add our score indicator
 //         sidePanel.add(new ScorePanel(ctx));
+
+        // add a box for scrolling around the board view
+        _boardSize = (Integer)config.params.get("board_size");
+        _vrange = new VirtualRangeModel(view);
+        ScrollBox scroller = new ScrollBox(
+            _vrange.getHorizModel(), _vrange.getVertModel());
+        scroller.setPreferredSize(new Dimension(100, 100));
+        sidePanel.add(scroller, VGroupLayout.FIXED);
 
         // de-opaquify everything before we add the chat box
         SwingUtil.setOpaque(sidePanel, false);
@@ -85,5 +98,12 @@ public class ScrackPanel extends PlacePanel
         add(sidePanel, HGroupLayout.FIXED);
     }
 
-    protected ScrackBoardView _bview;
+    public void doLayout ()
+    {
+        super.doLayout();
+        _vrange.setScrollableArea(-50, -50, _boardSize*50+50, _boardSize*50+50);
+    }
+
+    protected int _boardSize;
+    protected VirtualRangeModel _vrange;
 }

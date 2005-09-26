@@ -66,12 +66,12 @@ public class ScrackController extends GameController
         return _panel;
     }
 
-//     @Override // documentation inherited
-//     protected void gameDidStart ()
-//     {
-//         super.gameDidStart();
-//         _panel.gameDidStart();
-//     }
+    @Override // documentation inherited
+    protected void gameDidStart ()
+    {
+        super.gameDidStart();
+        _panel.view.gameDidStart();
+    }
 
 //     @Override // documentation inherited
 //     protected void gameDidEnd ()

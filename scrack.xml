@@ -20,7 +20,7 @@
   <!-- creating a game and which are passed on to the game itself -->
   <!-- to customize the gameplay. -->
   <params>
-    <range ident="board_size" minimum="10" maximum="100" start="50"/>
+    <range ident="board_size" minimum="10" maximum="100" start="25"/>
     <range ident="command_points" minimum="2" maximum="10" start="5"/>
   </params>
 </game>

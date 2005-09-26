@@ -80,7 +80,7 @@ public class ScrackManager extends GameManager
         }
 
         // randomly distribute independent planets around the board
-        int iplanets = size;
+        int iplanets = 2 * size;
         for (int ii = 0; ii < iplanets; ii++) {
             int psize = RandomUtil.getInt(MAX_PLANET_SIZE - MIN_PLANET_SIZE) +
                 MIN_PLANET_SIZE;
