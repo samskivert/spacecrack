@@ -4,14 +4,11 @@
 package com.samskivert.scrack.client;
 
 import com.threerings.crowd.client.PlaceView;
-import com.threerings.crowd.data.PlaceObject;
 import com.threerings.crowd.util.CrowdContext;
 
 import com.threerings.parlor.game.client.GameController;
 import com.threerings.toybox.data.ToyBoxGameConfig;
 import com.threerings.toybox.util.ToyBoxContext;
-
-import com.samskivert.scrack.data.ScrackObject;
 
 /**
  * Coordinates the client side of the game interface.
@@ -21,22 +18,6 @@ public class ScrackController extends GameController
     /** The name of the command posted by the "Back to lobby" button in
      * the side bar. */
     public static final String BACK_TO_LOBBY = "BackToLobby";
-
-    @Override // documentation inherited
-    public void willEnterPlace (PlaceObject plobj)
-    {
-        super.willEnterPlace(plobj);
-
-        // get a casted reference to our game object
-        _scrobj = (ScrackObject)plobj;
-    }
-
-    // documentation inherited
-    public void didLeavePlace (PlaceObject plobj)
-    {
-        super.didLeavePlace(plobj);
-        _scrobj = null;
-    }
 
     /**
      * This method is called automatically by the controller system when
@@ -85,7 +66,4 @@ public class ScrackController extends GameController
 
     /** Our game panel. */
     protected ScrackPanel _panel;
-
-    /** Our game distributed object. */
-    protected ScrackObject _scrobj;
 }

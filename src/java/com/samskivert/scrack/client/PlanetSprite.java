@@ -10,6 +10,8 @@ import com.threerings.media.sprite.Sprite;
 
 import com.samskivert.scrack.data.Planet;
 
+import static com.samskivert.scrack.client.ScrackMetrics.*;
+
 /**
  * Displays a planet.
  */
@@ -17,16 +19,15 @@ public class PlanetSprite extends Sprite
 {
     public PlanetSprite (Planet planet)
     {
-        super(planet.size*5, planet.size*5);
+        super(planet.size*SIZE, planet.size*SIZE);
+        _planet = planet;
 
         // our origin is in the center of the graphic
         _oxoff = _bounds.width/2;
         _oyoff = _bounds.height/2;
 
-        _planet = planet;
-
         // position ourselves based on our planet's coordinates
-        setLocation(_planet.coords.x * 50, _planet.coords.y * 50);
+        setLocation(_planet.coords.x * TILE_SIZE, _planet.coords.y * TILE_SIZE);
     }
 
     /** Returns the planet we're rendering. */

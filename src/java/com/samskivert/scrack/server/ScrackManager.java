@@ -73,7 +73,7 @@ public class ScrackManager extends GameManager
 
         // place the players' starting planets
         int players = getPlayerCount();
-        int[] sx = { 0, size-1, 0, size-1 }, sy = { 0, size-1, size-1, 0 };
+        int[] sx = { 1, size-1, 1, size-1 }, sy = { 1, size-1, size-1, 1 };
         for (int ii = 0; ii < getPlayerCount(); ii++) {
             Planet p = new Planet(sx[ii], sy[ii], MIN_PLANET_SIZE, ii);
             planets.put(p.coords, p);
@@ -86,8 +86,8 @@ public class ScrackManager extends GameManager
                 MIN_PLANET_SIZE;
             Planet planet = null;
             for (int tt = 0; tt < 25; tt++) {
-                Planet p = new Planet(RandomUtil.getInt(size),
-                                      RandomUtil.getInt(size), psize, -1);
+                Planet p = new Planet(RandomUtil.getInt(size-1)+1,
+                                      RandomUtil.getInt(size-1)+1, psize, -1);
                 if (!planets.containsKey(p.coords)) {
                     planet = p;
                     break;

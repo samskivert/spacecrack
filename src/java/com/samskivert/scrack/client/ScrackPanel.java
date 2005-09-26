@@ -25,6 +25,7 @@ import com.threerings.toybox.client.ToyBoxUI;
 import com.threerings.toybox.data.ToyBoxGameConfig;
 import com.threerings.toybox.util.ToyBoxContext;
 
+import static com.samskivert.scrack.client.ScrackMetrics.*;
 import static com.samskivert.scrack.data.ScrackCodes.*;
 
 /**
@@ -52,7 +53,8 @@ public class ScrackPanel extends PlacePanel
 	setLayout(gl);
 
         // create and add the board view
-        add(view = new ScrackBoardView(ctx)); 
+        _boardSize = (Integer)config.params.get("board_size");
+        add(view = new ScrackBoardView(ctx, _boardSize)); 
 
         // create our side panel
         VGroupLayout sgl = new VGroupLayout(VGroupLayout.STRETCH);
@@ -71,7 +73,6 @@ public class ScrackPanel extends PlacePanel
 //         sidePanel.add(new ScorePanel(ctx));
 
         // add a box for scrolling around the board view
-        _boardSize = (Integer)config.params.get("board_size");
         _vrange = new VirtualRangeModel(view);
         ScrollBox scroller = new ScrollBox(
             _vrange.getHorizModel(), _vrange.getVertModel());
@@ -98,10 +99,17 @@ public class ScrackPanel extends PlacePanel
         add(sidePanel, HGroupLayout.FIXED);
     }
 
+    @Override // documentation inherited
     public void doLayout ()
     {
         super.doLayout();
-        _vrange.setScrollableArea(-50, -50, _boardSize*50+50, _boardSize*50+50);
+
+        // after we've size the board view, we need to update the
+        // scrollbox to let it know how big its scrollable area is and
+        // trigger a resize of the scroll thumb based on the current size
+        // of the board view
+        int tile = SIZE * MAX_PLANET_SIZE;
+        _vrange.setScrollableArea(0, 0, _boardSize*tile, _boardSize*tile);
     }
 
     protected int _boardSize;
