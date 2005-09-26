@@ -16,11 +16,11 @@ public class Ship extends SimpleStreamableObject
     /** The coordinates of this ship in space. */
     public Coords coords;
 
-    /** The index of the player that owns this ship. */
-    public int owner;
-
     /** Represents the size of this ship. */
     public int size;
+
+    /** The index of the player that owns this ship. */
+    public int owner;
 
     // documentation inherited from interface DSet.Entry
     public Comparable getKey ()
@@ -34,11 +34,12 @@ public class Ship extends SimpleStreamableObject
     }
 
     /**
-     * Creates a new ship with the specified owner and coordinates.
+     * Creates a new ship with the specified coordinates, size, and owner.
      */
-    public Ship (int owner, int x, int y)
+    public Ship (int x, int y, int size, int owner)
     {
-        this.owner = owner;
         coords = new Coords(x, y);
+        this.size = size;
+        this.owner = owner;
     }
 }
