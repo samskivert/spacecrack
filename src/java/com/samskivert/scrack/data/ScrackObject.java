@@ -3,7 +3,13 @@
 
 package com.samskivert.scrack.data;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+
+import com.samskivert.util.ArrayIntSet;
+import com.samskivert.util.Tuple;
+import com.threerings.media.util.MathUtil;
 
 import com.threerings.presents.dobj.DSet;
 
@@ -63,6 +69,21 @@ public class ScrackObject extends GameObject
             Ship ship = (Ship)iter.next();
             if (ship.coords.equals(coords)) {
                 return ship;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the planet at the specified coordinates or null if no planet is
+     * docked at those coordinates.
+     */
+    public Planet locatePlanet (Coords coords)
+    {
+        for (Iterator iter = planets.iterator(); iter.hasNext(); ) {
+            Planet planet = (Planet)iter.next();
+            if (planet.coords.equals(coords)) {
+                return planet;
             }
         }
         return null;
@@ -292,4 +313,7 @@ public class ScrackObject extends GameObject
         this.finished[index] = value;
     }
     // AUTO-GENERATED: METHODS END
+
+    protected transient HashMap<Integer,ArrayIntSet> _neighbors =
+        new HashMap<Integer,ArrayIntSet>();
 }

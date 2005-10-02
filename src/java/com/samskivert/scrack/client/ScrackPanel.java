@@ -5,8 +5,12 @@ package com.samskivert.scrack.client;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Iterator;
+import java.awt.Rectangle;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import com.samskivert.scrack.data.ScrackObject;
+import com.samskivert.scrack.data.Planet;
 import javax.swing.JPanel;
 
 import com.samskivert.swing.HGroupLayout;
@@ -20,6 +24,7 @@ import com.threerings.media.VirtualRangeModel;
 import com.threerings.util.MessageBundle;
 
 import com.threerings.crowd.client.PlacePanel;
+import com.threerings.crowd.data.PlaceObject;
 
 import com.threerings.toybox.client.ChatPanel;
 import com.threerings.toybox.client.ToyBoxUI;
@@ -57,8 +62,7 @@ public class ScrackPanel extends PlacePanel
 	setLayout(gl);
 
         // create and add the board view
-        _boardSize = (Integer)config.params.get("board_size");
-        add(view = new ScrackBoardView(ctx, _boardSize)); 
+        add(view = new ScrackBoardView(ctx)); 
 
         // create our side panel
         VGroupLayout sgl = new VGroupLayout(VGroupLayout.STRETCH);
@@ -112,14 +116,29 @@ public class ScrackPanel extends PlacePanel
     {
         super.doLayout();
 
+        // determine a boundary that contains all of our planets
+        Rectangle rect = new Rectangle(0, 0, 0, 0);
+        for (Iterator iter = _scrobj.planets.iterator(); iter.hasNext(); ) {
+            Planet p = (Planet)iter.next();
+            rect.add(p.coords.x, p.coords.y);
+        }
+        rect.width++;
+        rect.height++;
+
         // after we've size the board view, we need to update the
         // scrollbox to let it know how big its scrollable area is and
         // trigger a resize of the scroll thumb based on the current size
         // of the board view
-        int tile = SIZE * MAX_PLANET_SIZE;
-        _vrange.setScrollableArea(0, 0, _boardSize*tile, _boardSize*tile);
+        _vrange.setScrollableArea(rect.x*TILE_SIZE, rect.y*TILE_SIZE,
+                                  rect.width*TILE_SIZE, rect.height*TILE_SIZE);
     }
 
-    protected int _boardSize;
+    @Override // documentation inherited
+    public void willEnterPlace (PlaceObject plobj)
+    {
+        _scrobj = (ScrackObject)plobj;
+    }
+
     protected VirtualRangeModel _vrange;
+    protected ScrackObject _scrobj;
 }

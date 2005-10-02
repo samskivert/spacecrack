@@ -3,7 +3,10 @@
 
 package com.samskivert.scrack.data;
 
+import com.samskivert.util.IntListUtil;
+
 import com.threerings.io.SimpleStreamableObject;
+
 import com.threerings.presents.dobj.DSet;
 
 /**
@@ -27,6 +30,9 @@ public class Planet extends SimpleStreamableObject
      * independent. */
     public int owner;
 
+    /** The planet ids of all this planet's neighbors. */
+    public int[] neighbors;
+
     // documentation inherited from interface DSet.Entry
     public Comparable getKey ()
     {
@@ -48,6 +54,14 @@ public class Planet extends SimpleStreamableObject
         coords = new Coords(x, y);
         this.size = size;
         this.owner = owner;
+    }
+
+    /**
+     * Returns true if the specified planet is a neighbor of this planet.
+     */
+    public boolean isNeighbor (Planet other)
+    {
+        return IntListUtil.contains(neighbors, other.planetId);
     }
 
     /** Used to assign unique ids to all planets. */

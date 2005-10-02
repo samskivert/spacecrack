@@ -27,10 +27,10 @@ public class ScrackController extends GameController
     public static final String BACK_TO_LOBBY = "BackToLobby";
 
     /** A command posted by a planet when it is clicked. */
-    public static final String PLANET_SELECTED = "PlanetSelected";
+    public static final String PLANET_CLICKED = "PlanetClicked";
 
     /** A command posted by a ship when it is clicked. */
-    public static final String SHIP_SELECTED = "ShipSelected";
+    public static final String SHIP_CLICKED = "ShipClicked";
 
     /** A command posted when the player wants to build a ship at the selected
      * planet. */
@@ -50,7 +50,7 @@ public class ScrackController extends GameController
     /**
      * This method is called when the player clicks on a planet.
      */
-    public void handlePlanetSelected (Object source, PlanetSprite psprite)
+    public void handlePlanetClicked (Object source, PlanetSprite psprite)
     {
         // if we already have a ship selected, then the player wants to move
         // that ship to this planet; if we still have command points, do so
@@ -58,16 +58,16 @@ public class ScrackController extends GameController
             Ship ship = ((ShipSprite)_selection).getShip();
             Planet planet = psprite.getPlanet();
 
-            // TODO: make sure this planet is a neighbor to the planet the ship
+            // make sure this planet is a neighbor to the planet the ship
             // currently occupies
-//             if () {
-
+            Planet cplanet = _scrobj.locatePlanet(ship.coords);
+            if (cplanet != null && cplanet.isNeighbor(planet)) {
                 _scrobj.service.moveShip(
                     _ctx.getClient(), ship.shipId, planet.planetId);
                 // we leave the ship selected so that the user can easily chain
                 // moves with a single ship
-//             }
-            return;
+                return;
+            }
         }
 
         // otherwise if there's a planet selected, clear that selection
@@ -82,8 +82,13 @@ public class ScrackController extends GameController
     /**
      * This method is called when the player clicks on a ship.
      */
-    public void handleShipSelected (Object source, ShipSprite ssprite)
+    public void handleShipClicked (Object source, ShipSprite ssprite)
     {
+        // don't allow selecting other player's ships
+        if (ssprite.getShip().owner != _selfIdx) {
+            return;
+        }
+
         // if there's another ship or planet selected, clear that selection; if
         // they clicked again on the already selected ship, just deselect it
         CelestialSprite oselection = _selection;

@@ -3,6 +3,7 @@
 
 package com.samskivert.scrack.server;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import com.samskivert.scrack.data.Planet;
 import com.samskivert.scrack.data.ScrackMarshaller;
 import com.samskivert.scrack.data.ScrackObject;
 import com.samskivert.scrack.data.Ship;
+import com.samskivert.util.ArrayIntSet;
 
 import static com.samskivert.scrack.Log.log;
 import static com.samskivert.scrack.data.ScrackCodes.*;
@@ -63,8 +65,16 @@ public class ScrackManager extends GameManager
             return;
         }
 
-        // TODO: make sure the destination planet neighbors the planet at the
-        // ships current coordinates
+        // make sure the destination planet neighbors the planet at the ships
+        // current coordinates
+        Planet splanet = _scrobj.locatePlanet(ship.coords);
+        if (splanet == null || !splanet.isNeighbor(planet)) {
+            log.warning("Requested to move from invalid planet " +
+                        "[game=" + where() + ", who=" + user.who() +
+                        ", ship=" + ship + ", src=" + splanet +
+                        ", dest=" + planet + "].");
+            return;
+        }
 
         // make sure the caller has sufficient command points
         if (_scrobj.points[pidx] <= 0) {
@@ -100,11 +110,11 @@ public class ScrackManager extends GameManager
                 _scrobj.removeFromShips(target.getKey());
             } else if (ship.size > target.size) {
                 _scrobj.removeFromShips(target.getKey());
-                ship.size -= (ship.size/2);
+                ship.size -= (target.size/2);
                 _scrobj.updateShips(ship);
             } else {
                 _scrobj.removeFromShips(ship.getKey());
-                target.size -= (target.size/2);
+                target.size -= (ship.size/2);
                 _scrobj.updateShips(target);
             }
         }
@@ -180,8 +190,9 @@ public class ScrackManager extends GameManager
         super.gameWillStart();
 
         ToyBoxGameConfig gconfig = (ToyBoxGameConfig)_config;
-        int size = (Integer)gconfig.params.get("board_size");
         _cpoints = (Integer)gconfig.params.get("command_points");
+        _efficiency = (Integer)gconfig.params.get("crack_pct")/100f;
+        _interiorBonus = (Integer)gconfig.params.get("interior_bonus")/100f;
 
         // configure the per-player arrays
         int players = getPlayerCount();
@@ -191,35 +202,62 @@ public class ScrackManager extends GameManager
         Arrays.fill(cpoints, _cpoints);
         _scrobj.setPoints(cpoints);
 
+        // populate the board with planets
         HashMap<Coords,Planet> planets = new HashMap<Coords,Planet>();
 
-        // place the players' starting planets
-        int[] sx = { 1, size-1, 1, size-1 }, sy = { 1, size-1, size-1, 1 };
-        for (int ii = 0; ii < getPlayerCount(); ii++) {
-            Planet p = new Planet(sx[ii], sy[ii], MIN_PLANET_SIZE, ii);
-            planets.put(p.coords, p);
+        // determine the board size
+        int size = (Integer)gconfig.params.get("board_size");
+        // width must be 1 modulo 4; height must be 1 modulo 2
+        int width = 4 * (size/4) + 1;
+        int height = 2 * (size/2) + 1;
+
+        // create a (quasi-)hexagonal arrangement of planets
+        for (int yy = 0; yy < height; yy++) {
+            for (int xx = (yy%2 == 0) ? 2 : 0; xx < width; xx += 4) {
+                Planet p = new Planet(xx+1, yy+1, MIN_PLANET_SIZE+1, -1);
+                planets.put(p.coords, p);
+            }
         }
 
-        // randomly distribute independent planets around the board
-        int iplanets = 2 * size;
-        for (int ii = 0; ii < iplanets; ii++) {
-            int psize = RandomUtil.getInt(MAX_PLANET_SIZE - MIN_PLANET_SIZE) +
-                MIN_PLANET_SIZE;
-            Planet planet = null;
-            for (int tt = 0; tt < 25; tt++) {
-                Planet p = new Planet(RandomUtil.getInt(size-1)+1,
-                                      RandomUtil.getInt(size-1)+1, psize, -1);
-                if (!planets.containsKey(p.coords)) {
-                    planet = p;
-                    break;
+        // assign the players' starting planets
+        Coords coords = new Coords();
+        int[] sx = { 1, width, 1, width };
+        int[] sy = { 2, height-1, height-1, 2 };
+        for (int ii = 0; ii < getPlayerCount(); ii++) {
+            coords.x = sx[ii];
+            coords.y = sy[ii];
+            planets.get(coords).owner = ii;
+        }
+
+        // fill in the neighbors array for the planets and while doing so,
+        // randomly shift the planetary mass around a bit
+        ArrayIntSet nset = new ArrayIntSet();
+        ArrayList<Planet> nlist = new ArrayList<Planet>();
+        for (Planet planet : planets.values()) {
+            // determine which of our neighbors exist
+            for (int ii = 0; ii < NDX.length; ii++) {
+                coords.x = planet.coords.x + NDX[ii];
+                coords.y = planet.coords.y + NDY[ii];
+                Planet n = planets.get(coords);
+                if (n != null) {
+                    nset.add(n.planetId);
+                    if (n.owner == -1) {
+                        nlist.add(n);
+                    }
                 }
             }
-            if (planet == null) {
-                log.warning("Failed to place planet after 25 attempts " +
-                            "[size=" + size + ", pidx=" + ii + "].");
-                break;
+            planet.neighbors = nset.toIntArray();
+
+            if (planet.owner == -1) {
+                // select one of our (unowned) neighbors at random and give
+                // them one of our size points
+                Planet n = (Planet)RandomUtil.pickRandom(nlist);
+                n.size += 1;
+                planet.size -= 1;
             }
-            planets.put(planet.coords, planet);
+
+            nlist.clear();
+            nset.clear();
         }
 
         // publish this list of planets in the game object
@@ -254,11 +292,16 @@ public class ScrackManager extends GameManager
         }
 
         // award crack for all owned planets
+        float[] crack = new float[_scrobj.crack.length];
         for (Iterator iter = _scrobj.planets.iterator(); iter.hasNext(); ) {
             Planet planet = (Planet)iter.next();
             if (planet.owner != -1) {
-                _scrobj.crack[planet.owner] += planet.size;
+                // TODO: grant bonus to interior planets
+                crack[planet.owner] += _efficiency * planet.size;
             }
+        }
+        for (int ii = 0; ii < crack.length; ii++) {
+            _scrobj.crack[ii] += (int)crack[ii];
         }
         _scrobj.setCrack(_scrobj.crack);
 
@@ -283,6 +326,16 @@ public class ScrackManager extends GameManager
     /** A casted reference to our game object. */
     protected ScrackObject _scrobj;
 
-    /** The number of command points awarded every "turn". */
+    /** The number of command points awarded every turn. */
     protected int _cpoints;
+
+    /** The "efficiency" of the planets; what percentage of their size they
+     * generate in crack every turn. */
+    protected float _efficiency;
+
+    /** The efficiency bonus for interior planets. */
+    protected float _interiorBonus;
+
+    protected static final int[] NDX = { -2, 0, 2, 2, 0, -2 };
+    protected static final int[] NDY = { -1, -2, -1, 1, 2, 1 };
 }
