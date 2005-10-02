@@ -13,6 +13,9 @@ import com.threerings.presents.dobj.DSet;
 public class Planet extends SimpleStreamableObject
     implements DSet.Entry
 {
+    /** A unique identifier for this planet. */
+    public Integer planetId;
+
     /** The coordinates of this planet in space. */
     public Coords coords;
 
@@ -27,7 +30,7 @@ public class Planet extends SimpleStreamableObject
     // documentation inherited from interface DSet.Entry
     public Comparable getKey ()
     {
-        return coords;
+        return planetId;
     }
 
     /** A blank constructor used for serialization. */
@@ -41,8 +44,12 @@ public class Planet extends SimpleStreamableObject
      */
     public Planet (int x, int y, int size, int owner)
     {
+        planetId = ++_nextPlanetId;
         coords = new Coords(x, y);
         this.size = size;
         this.owner = owner;
     }
+
+    /** Used to assign unique ids to all planets. */
+    protected static int _nextPlanetId;
 }

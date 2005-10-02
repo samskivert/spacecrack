@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import com.threerings.media.VirtualMediaPanel;
+import com.threerings.media.sprite.Sprite;
 
 import com.threerings.presents.dobj.EntryAddedEvent;
 import com.threerings.presents.dobj.EntryRemovedEvent;
@@ -57,14 +58,14 @@ public class ScrackBoardView extends VirtualMediaPanel
         for (Iterator iter = _scrobj.planets.iterator(); iter.hasNext(); ) {
             PlanetSprite sprite = new PlanetSprite((Planet)iter.next());
             addSprite(sprite);
-            _planets.put(sprite.getPlanet().coords, sprite);
+            _planets.put(sprite.getPlanet().planetId, sprite);
         }
 
         // and for each of the ships
         for (Iterator iter = _scrobj.ships.iterator(); iter.hasNext(); ) {
             ShipSprite sprite = new ShipSprite((Ship)iter.next());
             addSprite(sprite);
-            _ships.put(sprite.getShip().coords, sprite);
+            _ships.put(sprite.getShip().shipId, sprite);
         }
     }
 
@@ -90,7 +91,7 @@ public class ScrackBoardView extends VirtualMediaPanel
         if (event.getName().equals(ScrackObject.SHIPS)) {
             ShipSprite sprite = new ShipSprite((Ship)event.getEntry());
             addSprite(sprite);
-            _ships.put(sprite.getShip().coords, sprite);
+            _ships.put(sprite.getShip().shipId, sprite);
         }
     }
 
@@ -98,11 +99,11 @@ public class ScrackBoardView extends VirtualMediaPanel
     public void entryUpdated (EntryUpdatedEvent event)
     {
         if (event.getName().equals(ScrackObject.PLANETS)) {
-            Planet nplanet = (Planet)event.getEntry();
-            _planets.get(((Planet)event.getOldEntry()).coords).updated(nplanet);
+            Planet planet = (Planet)event.getEntry();
+            _planets.get(planet.planetId).updated(planet);
         } else if (event.getName().equals(ScrackObject.SHIPS)) {
-            Ship nship = (Ship)event.getEntry();
-            _ships.get(((Ship)event.getOldEntry()).coords).updated(nship);
+            Ship ship = (Ship)event.getEntry();
+            _ships.get(ship.shipId).updated(ship);
         }
     }
 
@@ -110,7 +111,7 @@ public class ScrackBoardView extends VirtualMediaPanel
     public void entryRemoved (EntryRemovedEvent event)
     {
         if (event.getName().equals(ScrackObject.SHIPS)) {
-            removeSprite(_ships.remove((Coords)event.getKey()));
+            removeSprite(_ships.remove((Integer)event.getKey()));
         }
     }
 
@@ -136,8 +137,8 @@ public class ScrackBoardView extends VirtualMediaPanel
     protected ScrackObject _scrobj;
     protected int _boardSize;
 
-    protected HashMap<Coords,PlanetSprite> _planets =
-        new HashMap<Coords,PlanetSprite>();
-    protected HashMap<Coords,ShipSprite> _ships =
-        new HashMap<Coords,ShipSprite>();
+    protected HashMap<Integer,PlanetSprite> _planets =
+        new HashMap<Integer,PlanetSprite>();
+    protected HashMap<Integer,ShipSprite> _ships =
+        new HashMap<Integer,ShipSprite>();
 }

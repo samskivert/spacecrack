@@ -15,6 +15,7 @@ import com.samskivert.swing.ScrollBox;
 import com.samskivert.swing.VGroupLayout;
 import com.samskivert.swing.util.SwingUtil;
 
+import com.threerings.media.SafeScrollPane;
 import com.threerings.media.VirtualRangeModel;
 import com.threerings.util.MessageBundle;
 
@@ -69,8 +70,9 @@ public class ScrackPanel extends PlacePanel
         vlabel.setFont(ToyBoxUI.fancyFont);
         sidePanel.add(vlabel, VGroupLayout.FIXED);
 
-//         // add our score indicator
-//         sidePanel.add(new ScorePanel(ctx));
+        // add our player status indicator
+        sidePanel.add(new SafeScrollPane(new PlayerInfoView(ctx)),
+                      VGroupLayout.FIXED);
 
         // add a box for scrolling around the board view
         _vrange = new VirtualRangeModel(view);

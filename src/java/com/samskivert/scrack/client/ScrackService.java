@@ -14,14 +14,12 @@ import com.samskivert.scrack.data.Coords;
 public interface ScrackService extends InvocationService
 {
     /**
-     * Requests to move the ship at the specified coordinates to the
-     * specified destination coordinates.
+     * Requests to move the specified ship to the specified destination planet.
      */
-    public void moveShip (Client client, Coords current, Coords dest);
+    public void moveShip (Client client, int shipId, int planetId);
 
     /**
-     * Requests to build a ship on the planet at the specified
-     * coordinates.
+     * Requests to build a ship on the specified planet.
      */
-    public void buildShip (Client client, Coords planet);
+    public void buildShip (Client client, int planetId);
 }

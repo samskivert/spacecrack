@@ -4,7 +4,6 @@
 package com.samskivert.scrack.server;
 
 import com.samskivert.scrack.client.ScrackService;
-import com.samskivert.scrack.data.Coords;
 import com.samskivert.scrack.data.ScrackMarshaller;
 import com.threerings.presents.client.Client;
 import com.threerings.presents.data.ClientObject;
@@ -41,14 +40,14 @@ public class ScrackDispatcher extends InvocationDispatcher
         case ScrackMarshaller.BUILD_SHIP:
             ((ScrackProvider)provider).buildShip(
                 source,
-                (Coords)args[0]
+                ((Integer)args[0]).intValue()
             );
             return;
 
         case ScrackMarshaller.MOVE_SHIP:
             ((ScrackProvider)provider).moveShip(
                 source,
-                (Coords)args[0], (Coords)args[1]
+                ((Integer)args[0]).intValue(), ((Integer)args[1]).intValue()
             );
             return;
 

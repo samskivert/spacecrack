@@ -4,7 +4,6 @@
 package com.samskivert.scrack.data;
 
 import com.samskivert.scrack.client.ScrackService;
-import com.samskivert.scrack.data.Coords;
 import com.threerings.presents.client.Client;
 import com.threerings.presents.data.InvocationMarshaller;
 import com.threerings.presents.dobj.InvocationResponseEvent;
@@ -23,10 +22,10 @@ public class ScrackMarshaller extends InvocationMarshaller
     public static final int BUILD_SHIP = 1;
 
     // documentation inherited from interface
-    public void buildShip (Client arg1, Coords arg2)
+    public void buildShip (Client arg1, int arg2)
     {
         sendRequest(arg1, BUILD_SHIP, new Object[] {
-            arg2
+            new Integer(arg2)
         });
     }
 
@@ -34,10 +33,10 @@ public class ScrackMarshaller extends InvocationMarshaller
     public static final int MOVE_SHIP = 2;
 
     // documentation inherited from interface
-    public void moveShip (Client arg1, Coords arg2, Coords arg3)
+    public void moveShip (Client arg1, int arg2, int arg3)
     {
         sendRequest(arg1, MOVE_SHIP, new Object[] {
-            arg2, arg3
+            new Integer(arg2), new Integer(arg3)
         });
     }
 

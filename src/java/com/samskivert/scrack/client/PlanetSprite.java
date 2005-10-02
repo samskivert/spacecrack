@@ -4,9 +4,8 @@
 package com.samskivert.scrack.client;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
-
-import com.threerings.media.sprite.Sprite;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 
 import com.samskivert.scrack.data.Planet;
 
@@ -15,19 +14,15 @@ import static com.samskivert.scrack.client.ScrackMetrics.*;
 /**
  * Displays a planet.
  */
-public class PlanetSprite extends Sprite
+public class PlanetSprite extends CelestialSprite
 {
     public PlanetSprite (Planet planet)
     {
-        super(planet.size*SIZE, planet.size*SIZE);
-        _planet = planet;
+        super(ScrackController.PLANET_SELECTED,
+              planet.size*SIZE, planet.size*SIZE);
 
-        // our origin is in the center of the graphic
-        _oxoff = _bounds.width/2;
-        _oyoff = _bounds.height/2;
-
-        // position ourselves based on our planet's coordinates
-        setLocation(_planet.coords.x * TILE_SIZE, _planet.coords.y * TILE_SIZE);
+        // update ourselves for the first time
+        updated(planet);
     }
 
     /** Returns the planet we're rendering. */
@@ -39,22 +34,36 @@ public class PlanetSprite extends Sprite
     /** Called when our planet is updated, updates our display of it. */
     public void updated (Planet planet)
     {
-        // just update our reference and dirty ourselves
         _planet = planet;
+
+        // position ourselves based on our planet's coordinates
+        setLocation(_planet.coords.x * TILE_SIZE, _planet.coords.y * TILE_SIZE);
+
+        // update our planet shape
+        updateShape((Ellipse2D)_shape);
+
         invalidate();
     }
 
     @Override // documentation inherited
-    public void paint (Graphics2D gfx)
+    protected Shape createShape ()
     {
-        if (_planet.owner == -1) {
-            gfx.setColor(Color.gray);
-        } else {
-            gfx.setColor(ScrackBoardView.COLORS[_planet.owner]);
-        }
-        gfx.fillOval(_bounds.x, _bounds.y, _bounds.width-1, _bounds.height-1);
-        gfx.setColor(Color.white);
-        gfx.drawOval(_bounds.x, _bounds.y, _bounds.width-1, _bounds.height-1);
+        Ellipse2D.Float circle = new Ellipse2D.Float();
+        updateShape(circle);
+        return circle;
+    }
+
+    @Override // documentation inherited
+    protected Color getFillColor ()
+    {
+        return (_planet.owner == -1) ?
+            Color.gray : ScrackBoardView.COLORS[_planet.owner];
+    }
+
+    protected void updateShape (Ellipse2D circle)
+    {
+        circle.setFrame(
+            _bounds.x, _bounds.y, _bounds.width-1, _bounds.height-1);
     }
 
     protected Planet _planet;

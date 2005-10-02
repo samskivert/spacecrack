@@ -3,6 +3,8 @@
 
 package com.samskivert.scrack.data;
 
+import java.util.Iterator;
+
 import com.threerings.presents.dobj.DSet;
 
 import com.threerings.parlor.game.data.GameObject;
@@ -27,6 +29,9 @@ public class ScrackObject extends GameObject
 
     /** The field name of the <code>points</code> field. */
     public static final String POINTS = "points";
+
+    /** The field name of the <code>finished</code> field. */
+    public static final String FINISHED = "finished";
     // AUTO-GENERATED: FIELDS END
 
     /** Provides the mechanism for the client to make requests of the
@@ -34,16 +39,50 @@ public class ScrackObject extends GameObject
     public ScrackMarshaller service;
 
     /** Contains all of the planets in the game. */
-    public DSet planets;
+    public DSet planets = new DSet();
 
     /** Contains all of the ships in play. */
-    public DSet ships;
+    public DSet ships = new DSet();
 
     /** Contains the quantity of crack possessed by each player. */
     public int[] crack;
 
     /** Contains the number of command points possessed by each player. */
     public int[] points;
+
+    /** Indicates whether each player is finished with their turn. */
+    public boolean[] finished;
+
+    /**
+     * Returns the ship at the specified coordinates or null if no ship is
+     * docked at those coordinates.
+     */
+    public Ship locateShip (Coords coords)
+    {
+        for (Iterator iter = ships.iterator(); iter.hasNext(); ) {
+            Ship ship = (Ship)iter.next();
+            if (ship.coords.equals(coords)) {
+                return ship;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the number of planets owned by the player with the specified
+     * index.
+     */
+    public int countPlanets (int owner)
+    {
+        int pcount = 0;
+        for (Iterator iter = planets.iterator(); iter.hasNext(); ) {
+            Planet planet = (Planet)iter.next();
+            if (planet.owner == owner) {
+                pcount++;
+            }
+        }
+        return pcount;
+    }
 
     // AUTO-GENERATED: METHODS START
     /**
@@ -218,6 +257,39 @@ public class ScrackObject extends GameObject
         requestElementUpdate(
             POINTS, index, new Integer(value), new Integer(ovalue));
         this.points[index] = value;
+    }
+
+    /**
+     * Requests that the <code>finished</code> field be set to the
+     * specified value. The local value will be updated immediately and an
+     * event will be propagated through the system to notify all listeners
+     * that the attribute did change. Proxied copies of this object (on
+     * clients) will apply the value change when they received the
+     * attribute changed notification.
+     */
+    public void setFinished (boolean[] value)
+    {
+        boolean[] ovalue = this.finished;
+        requestAttributeChange(
+            FINISHED, value, ovalue);
+        this.finished = (value == null) ? null : (boolean[])value.clone();
+    }
+
+    /**
+     * Requests that the <code>index</code>th element of
+     * <code>finished</code> field be set to the specified value.
+     * The local value will be updated immediately and an event will be
+     * propagated through the system to notify all listeners that the
+     * attribute did change. Proxied copies of this object (on clients)
+     * will apply the value change when they received the attribute
+     * changed notification.
+     */
+    public void setFinishedAt (boolean value, int index)
+    {
+        boolean ovalue = this.finished[index];
+        requestElementUpdate(
+            FINISHED, index, new Boolean(value), new Boolean(ovalue));
+        this.finished[index] = value;
     }
     // AUTO-GENERATED: METHODS END
 }

@@ -13,6 +13,9 @@ import com.threerings.presents.dobj.DSet;
 public class Ship extends SimpleStreamableObject
     implements DSet.Entry
 {
+    /** A unique identifier for this ship. */
+    public Integer shipId;
+
     /** The coordinates of this ship in space. */
     public Coords coords;
 
@@ -25,7 +28,7 @@ public class Ship extends SimpleStreamableObject
     // documentation inherited from interface DSet.Entry
     public Comparable getKey ()
     {
-        return coords;
+        return shipId;
     }
 
     /** A blank constructor used for serialization. */
@@ -38,8 +41,12 @@ public class Ship extends SimpleStreamableObject
      */
     public Ship (int x, int y, int size, int owner)
     {
+        shipId = ++_nextShipId;
         coords = new Coords(x, y);
         this.size = size;
         this.owner = owner;
     }
+
+    /** Used to assign unique ids to all ships. */
+    protected static int _nextShipId;
 }

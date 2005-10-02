@@ -4,10 +4,8 @@
 package com.samskivert.scrack.client;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Polygon;
-
-import com.threerings.media.sprite.Sprite;
+import java.awt.Shape;
 
 import com.samskivert.scrack.data.Ship;
 
@@ -16,15 +14,11 @@ import static com.samskivert.scrack.client.ScrackMetrics.*;
 /**
  * Displays a ship.
  */
-public class ShipSprite extends Sprite
+public class ShipSprite extends CelestialSprite
 {
     public ShipSprite (Ship ship)
     {
-        super(ship.size*SIZE, ship.size*SIZE);
-
-        // our origin is in the center of the graphic
-        _oxoff = _bounds.width/2;
-        _oyoff = _bounds.height/2;
+        super(ScrackController.SHIP_SELECTED, ship.size*SIZE, ship.size*SIZE);
 
         // render above the planets
         _renderOrder = 1;
@@ -42,27 +36,45 @@ public class ShipSprite extends Sprite
     /** Called when our ship is updated, updates our display of it. */
     public void updated (Ship ship)
     {
+        // if we're changing size, we have to do some jiggering
+        if (_ship != null && ship.size != _ship.size) {
+            invalidate();
+            _bounds.width = ship.size * SIZE;
+            _bounds.height = ship.size * SIZE;
+            _oxoff = _bounds.width/2;
+            _oyoff = _bounds.height/2;
+        }
         _ship = ship;
 
         // position ourselves based on our ship's coordinates; TODO: animate
         setLocation(_ship.coords.x * TILE_SIZE, _ship.coords.y * TILE_SIZE);
 
-        // update our glyph
-        _glyph.reset();
-        _glyph.addPoint(_bounds.x + _bounds.width/2, _bounds.y);
-        _glyph.addPoint(_bounds.x, _bounds.y+_bounds.height-1);
-        _glyph.addPoint(_bounds.x+_bounds.width-1, _bounds.y+_bounds.height-1);
+        // update our ship shape
+        ((Polygon)_shape).reset();
+        updateShape((Polygon)_shape);
 
         invalidate();
     }
 
     @Override // documentation inherited
-    public void paint (Graphics2D gfx)
+    protected Shape createShape ()
     {
-        gfx.setColor(ScrackBoardView.COLORS[_ship.owner]);
-        gfx.fill(_glyph);
-        gfx.setColor(Color.white);
-        gfx.draw(_glyph);
+        Polygon poly = new Polygon();
+        updateShape(poly);
+        return poly;
+    }
+
+    @Override // documentation inherited
+    protected Color getFillColor ()
+    {
+        return ScrackBoardView.COLORS[_ship.owner];
+    }
+
+    protected void updateShape (Polygon poly)
+    {
+        poly.addPoint(_bounds.x + _bounds.width/2, _bounds.y);
+        poly.addPoint(_bounds.x, _bounds.y+_bounds.height-1);
+        poly.addPoint(_bounds.x+_bounds.width-1, _bounds.y+_bounds.height-1);
     }
 
     protected Ship _ship;
