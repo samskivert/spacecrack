@@ -58,6 +58,11 @@ public class ScrackManager extends GameManager
             return;
         }
 
+        // no NOOPing
+        if (planet.coords.equals(ship.coords)) {
+            return;
+        }
+
         // TODO: make sure the destination planet neighbors the planet at the
         // ships current coordinates
 
@@ -104,19 +109,44 @@ public class ScrackManager extends GameManager
             }
         }
 
-        // use up a command point
-        _scrobj.setPointsAt(_scrobj.points[pidx]-1, pidx);
-
-        // if they are out of command points, auto-end their turn for them
-        if (_scrobj.points[pidx] == 0) {
-            _scrobj.setFinishedAt(true, pidx);
-        }
+        useCommandPoint(pidx);
     }
 
     // documentation inherited from interface ScrackProvider
     public void buildShip (ClientObject caller, int planetId)
     {
-        // TODO
+        BodyObject user = (BodyObject)caller;
+        int pidx = getPlayerIndex(user.username);
+
+        Planet planet = (Planet)_scrobj.planets.get(planetId);
+        if (planet == null || planet.owner != pidx) {
+            log.warning("Requested to build ship on invalid planet " +
+                        "[game=" + where() + ", who=" + user.who() +
+                        ", planetId=" + planetId + ", planet=" + planet + "].");
+            return;
+        }
+
+        // make sure the caller has sufficient command points
+        if (_scrobj.points[pidx] <= 0) {
+            return;
+        }
+
+        // make sure the caller has sufficient crack
+        if (_scrobj.crack[pidx] < planet.size) {
+            return;
+        }
+
+        // make sure there's not a ship already on the planet or just join with
+        // the ship there?
+
+        // create the ship and publish it to the game object
+        _scrobj.addToShips(
+            new Ship(planet.coords.x, planet.coords.y, planet.size, pidx));
+
+        // deduct the requisite crack
+        _scrobj.setCrackAt(_scrobj.crack[pidx] - planet.size, pidx);
+
+        useCommandPoint(pidx);
     }
 
     @Override // documentation inherited
@@ -201,6 +231,17 @@ public class ScrackManager extends GameManager
             ships.add(new Ship(sx[ii], sy[ii], MIN_PLANET_SIZE, ii));
         }
         _scrobj.setShips(new DSet(ships.iterator()));
+    }
+
+    protected void useCommandPoint (int pidx)
+    {
+        // use up a command point
+        _scrobj.setPointsAt(_scrobj.points[pidx]-1, pidx);
+
+        // if they are out of command points, auto-end their turn for them
+        if (_scrobj.points[pidx] == 0) {
+            _scrobj.setFinishedAt(true, pidx);
+        }
     }
 
     protected void maybeEndTurn ()

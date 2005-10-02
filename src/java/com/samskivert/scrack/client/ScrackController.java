@@ -32,6 +32,10 @@ public class ScrackController extends GameController
     /** A command posted by a ship when it is clicked. */
     public static final String SHIP_SELECTED = "ShipSelected";
 
+    /** A command posted when the player wants to build a ship at the selected
+     * planet. */
+    public static final String BUILD_SHIP = "BuildShip";
+
     /**
      * This method is called automatically by the controller system when
      * the player clicks the button that was configured with the {@link
@@ -69,11 +73,10 @@ public class ScrackController extends GameController
         // otherwise if there's a planet selected, clear that selection
         clearSelection();
 
-        // TODO: look up this planet's neighbors and highlight them
+        // display this planet as selected and display status on it
         _selection = psprite;
         _selection.setSelected(true);
-
-        // TODO: display status on the selected planet somewhere?
+        _panel.pinfo.setPlanet(psprite.getPlanet());
     }
 
     /**
@@ -81,14 +84,31 @@ public class ScrackController extends GameController
      */
     public void handleShipSelected (Object source, ShipSprite ssprite)
     {
-        // if there's another ship or planet selected, clear that selection
+        // if there's another ship or planet selected, clear that selection; if
+        // they clicked again on the already selected ship, just deselect it
+        CelestialSprite oselection = _selection;
         clearSelection();
+        if (oselection == ssprite) {
+            return;
+        }
 
-        // and note this selected ship
+        // display this ship as selected
         _selection = ssprite;
         _selection.setSelected(true);
 
+        // TODO: highlight the planets to which this ship can move?
         // TODO: display status on the selected ship somewhere?
+    }
+
+    /**
+     * Requests that we build a ship at the selected planet.
+     */
+    public void handleBuildShip (Object source)
+    {
+        if (_selection instanceof PlanetSprite) {
+            Planet planet = ((PlanetSprite)_selection).getPlanet();
+            _scrobj.service.buildShip(_ctx.getClient(), planet.planetId);
+        }
     }
 
     @Override // documentation inherited
@@ -126,6 +146,9 @@ public class ScrackController extends GameController
 
     protected void clearSelection ()
     {
+        if (_selection instanceof PlanetSprite) {
+            _panel.pinfo.setPlanet(null);
+        }
         if (_selection != null) {
             _selection.setSelected(false);
             _selection = null;

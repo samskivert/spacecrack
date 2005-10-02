@@ -34,6 +34,9 @@ import static com.samskivert.scrack.data.ScrackCodes.*;
  */
 public class ScrackPanel extends PlacePanel
 {
+    /** Displays info on the selected planet. */
+    public PlanetInfoView pinfo;
+
     /** Displays the main game visualization. */
     public ScrackBoardView view;
 
@@ -73,6 +76,9 @@ public class ScrackPanel extends PlacePanel
         // add our player status indicator
         sidePanel.add(new SafeScrollPane(new PlayerInfoView(ctx)),
                       VGroupLayout.FIXED);
+
+        // add a planet info display
+        sidePanel.add(pinfo = new PlanetInfoView(ctx), VGroupLayout.FIXED);
 
         // add a box for scrolling around the board view
         _vrange = new VirtualRangeModel(view);
