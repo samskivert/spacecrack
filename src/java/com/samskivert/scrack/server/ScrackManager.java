@@ -24,6 +24,7 @@ import com.threerings.toybox.data.ToyBoxGameConfig;
 
 import com.samskivert.scrack.data.Coords;
 import com.samskivert.scrack.data.Planet;
+import com.samskivert.scrack.data.ScrackCodes;
 import com.samskivert.scrack.data.ScrackMarshaller;
 import com.samskivert.scrack.data.ScrackObject;
 import com.samskivert.scrack.data.Ship;
@@ -117,6 +118,8 @@ public class ScrackManager extends GameManager
                 target.size -= (ship.size/2);
                 _scrobj.updateShips(target);
             }
+
+            // TODO: check for players being knocked out
         }
 
         useCommandPoint(pidx);
@@ -193,6 +196,9 @@ public class ScrackManager extends GameManager
         _cpoints = (Integer)gconfig.params.get("command_points");
         _efficiency = (Integer)gconfig.params.get("crack_pct")/100f;
         _interiorBonus = (Integer)gconfig.params.get("interior_bonus")/100f;
+
+        // start the turn counter with the total number of turns
+        _scrobj.setTurnsLeft((Integer)gconfig.params.get("turns"));
 
         // configure the per-player arrays
         int players = getPlayerCount();
@@ -271,6 +277,38 @@ public class ScrackManager extends GameManager
         _scrobj.setShips(new DSet(ships.iterator()));
     }
 
+    @Override // documentation inherited
+    protected void assignWinners (boolean[] winners)
+    {
+        // determine who has the highest planet count and amassed crack
+        ArrayIntSet winidxs = new ArrayIntSet();
+        int maxp = 0, maxc = 0;
+        for (int ii = 0; ii < winners.length; ii++) {
+            int pcount = _scrobj.countPlanets(ii);
+            if (pcount > maxp) {
+                maxp = pcount;
+                maxc = _scrobj.crack[ii];
+                winidxs.add(ii);
+            } else if (pcount == maxp && _scrobj.crack[ii] >= maxc) {
+                if (_scrobj.crack[ii] > maxc) {
+                    winidxs.clear();
+                }
+                winidxs.add(ii);
+            }
+        }
+        Arrays.fill(winners, false);
+        for (int ii = 0; ii < winidxs.size(); ii++) {
+            winners[winidxs.get(ii)] = true;
+        }
+    }
+
+    @Override // documentation inherited
+    protected void gameDidEnd ()
+    {
+        super.gameDidEnd();
+        systemMessage(ScrackCodes.SCRACK_MSGS, "m.game_over");
+    }
+
     protected void useCommandPoint (int pidx)
     {
         // use up a command point
@@ -296,14 +334,26 @@ public class ScrackManager extends GameManager
         for (Iterator iter = _scrobj.planets.iterator(); iter.hasNext(); ) {
             Planet planet = (Planet)iter.next();
             if (planet.owner != -1) {
-                // TODO: grant bonus to interior planets
-                crack[planet.owner] += _efficiency * planet.size;
+                float efficiency = _efficiency;
+                if (_scrobj.isInterior(planet)) {
+                    efficiency += _interiorBonus;
+                }
+                crack[planet.owner] +=  efficiency * planet.size;
             }
         }
         for (int ii = 0; ii < crack.length; ii++) {
             _scrobj.crack[ii] += (int)crack[ii];
         }
         _scrobj.setCrack(_scrobj.crack);
+
+        // otherwise start the next turn
+        _scrobj.setTurnsLeft(_scrobj.turnsLeft-1);
+
+        // if that was the final turn, end the game
+        if (_scrobj.turnsLeft == 0) {
+            endGame();
+            return;
+        }
 
         // award command points to each player
         for (int ii = 0; ii < _scrobj.points.length; ii++) {

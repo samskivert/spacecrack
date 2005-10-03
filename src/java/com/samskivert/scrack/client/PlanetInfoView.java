@@ -10,6 +10,8 @@ import javax.swing.JPanel;
 import com.samskivert.swing.VGroupLayout;
 import com.threerings.util.MessageBundle;
 
+import com.threerings.presents.dobj.AttributeChangeListener;
+import com.threerings.presents.dobj.AttributeChangedEvent;
 import com.threerings.presents.dobj.EntryAddedEvent;
 import com.threerings.presents.dobj.EntryRemovedEvent;
 import com.threerings.presents.dobj.EntryUpdatedEvent;
@@ -29,7 +31,7 @@ import com.samskivert.scrack.data.Ship;
  * Displays information on a planet.
  */
 public class PlanetInfoView extends JPanel
-    implements PlaceView, SetListener
+    implements PlaceView, SetListener, AttributeChangeListener
 {
     public PlanetInfoView (ToyBoxContext ctx)
     {
@@ -37,6 +39,8 @@ public class PlanetInfoView extends JPanel
                                5, VGroupLayout.TOP));
         _ctx = ctx;
         _msgs = _ctx.getMessageManager().getBundle(ScrackCodes.SCRACK_MSGS);
+
+        add(_turn = new JLabel(""));
 
         add(new JLabel(_msgs.get("m.planet_info")));
 //         add(_name = new JLabel(""));
@@ -76,6 +80,7 @@ public class PlanetInfoView extends JPanel
         _scrobj = (ScrackObject)plobj;
         _scrobj.addListener(this);
         _selfIdx = _scrobj.getPlayerIndex(_ctx.getUsername());
+        updateTurns();
     }
 
     // documentation inherited from interface PlaceView
@@ -122,12 +127,26 @@ public class PlanetInfoView extends JPanel
         }
     }
 
+    // documentation inherited from interface AttributeChangeListener
+    public void attributeChanged (AttributeChangedEvent event)
+    {
+        if (event.getName().equals(ScrackObject.TURNS_LEFT)) {
+            updateTurns();
+        }
+    }
+
+    protected void updateTurns ()
+    {
+        _turn.setText(_msgs.get("m.turns_left", "" + _scrobj.turnsLeft));
+    }
+
     protected ToyBoxContext _ctx;
     protected MessageBundle _msgs;
     protected ScrackObject _scrobj;
     protected int _selfIdx;
     protected Planet _planet;
 
+    protected JLabel _turn;
     protected JLabel _name, _owner, _size;
     protected JButton _build;
 }

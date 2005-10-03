@@ -24,6 +24,9 @@ public class ScrackObject extends GameObject
     /** The field name of the <code>service</code> field. */
     public static final String SERVICE = "service";
 
+    /** The field name of the <code>turnsLeft</code> field. */
+    public static final String TURNS_LEFT = "turnsLeft";
+
     /** The field name of the <code>planets</code> field. */
     public static final String PLANETS = "planets";
 
@@ -43,6 +46,9 @@ public class ScrackObject extends GameObject
     /** Provides the mechanism for the client to make requests of the
      * server. */
     public ScrackMarshaller service;
+
+    /** The number of turns remaining. */
+    public int turnsLeft;
 
     /** Contains all of the planets in the game. */
     public DSet planets = new DSet();
@@ -105,6 +111,21 @@ public class ScrackObject extends GameObject
         return pcount;
     }
 
+    /**
+     * Returns true if the specified planet is surrounded by friendly planets.
+     */
+    public boolean isInterior (Planet planet)
+    {
+        for (int ii = 0; ii < planet.neighbors.length; ii++) {
+            Planet n = (Planet)planets.get(planet.neighbors[ii]);
+            if (n.owner != planet.owner) {
+                return false;
+            }
+        }
+        // must not be on the edge of the board
+        return (planet.neighbors.length == 6);
+    }
+
     // AUTO-GENERATED: METHODS START
     /**
      * Requests that the <code>service</code> field be set to the
@@ -120,6 +141,22 @@ public class ScrackObject extends GameObject
         requestAttributeChange(
             SERVICE, value, ovalue);
         this.service = value;
+    }
+
+    /**
+     * Requests that the <code>turnsLeft</code> field be set to the
+     * specified value. The local value will be updated immediately and an
+     * event will be propagated through the system to notify all listeners
+     * that the attribute did change. Proxied copies of this object (on
+     * clients) will apply the value change when they received the
+     * attribute changed notification.
+     */
+    public void setTurnsLeft (int value)
+    {
+        int ovalue = this.turnsLeft;
+        requestAttributeChange(
+            TURNS_LEFT, new Integer(value), new Integer(ovalue));
+        this.turnsLeft = value;
     }
 
     /**

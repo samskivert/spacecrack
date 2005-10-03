@@ -20,6 +20,7 @@
   <!-- creating a game and which are passed on to the game itself -->
   <!-- to customize the gameplay. -->
   <params>
+    <range ident="turns" minimum="5" maximum="50" start="15"/>
     <range ident="board_size" minimum="5" maximum="30" start="12"/>
     <range ident="command_points" minimum="2" maximum="10" start="5"/>
     <range ident="crack_pct" minimum="10" maximum="100" start="50"/>
