@@ -50,6 +50,12 @@ public abstract class CelestialSprite extends Sprite
     }
 
     @Override // documentation inherited
+    public boolean hitTest (int x, int y)
+    {
+        return _shape.contains(x, y);
+    }
+
+    @Override // documentation inherited
     public void paint (Graphics2D gfx)
     {
         gfx.setColor(getFillColor());

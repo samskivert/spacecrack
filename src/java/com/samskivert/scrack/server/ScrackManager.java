@@ -272,7 +272,7 @@ public class ScrackManager extends GameManager
         // create a ship at each player's starting planet
         HashSet<Ship> ships = new HashSet<Ship>();
         for (int ii = 0; ii < getPlayerCount(); ii++) {
-            ships.add(new Ship(sx[ii], sy[ii], MIN_PLANET_SIZE, ii));
+            ships.add(new Ship(sx[ii], sy[ii], MIN_PLANET_SIZE+1, ii));
         }
         _scrobj.setShips(new DSet(ships.iterator()));
     }

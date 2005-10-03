@@ -19,7 +19,7 @@ public class PlanetSprite extends CelestialSprite
     public PlanetSprite (Planet planet)
     {
         super(ScrackController.PLANET_CLICKED,
-              planet.size*SIZE, planet.size*SIZE);
+              (planet.size+2)*SIZE, (planet.size+2)*SIZE);
 
         // update ourselves for the first time
         updated(planet);

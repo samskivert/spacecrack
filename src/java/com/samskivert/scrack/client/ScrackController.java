@@ -64,8 +64,7 @@ public class ScrackController extends GameController
             if (cplanet != null && cplanet.isNeighbor(planet)) {
                 _scrobj.service.moveShip(
                     _ctx.getClient(), ship.shipId, planet.planetId);
-                // we leave the ship selected so that the user can easily chain
-                // moves with a single ship
+                clearSelection();
                 return;
             }
         }
@@ -100,9 +99,9 @@ public class ScrackController extends GameController
         // display this ship as selected
         _selection = ssprite;
         _selection.setSelected(true);
+        _panel.pinfo.setShip(ssprite.getShip());
 
         // TODO: highlight the planets to which this ship can move?
-        // TODO: display status on the selected ship somewhere?
     }
 
     /**

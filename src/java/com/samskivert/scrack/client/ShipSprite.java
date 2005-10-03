@@ -18,7 +18,7 @@ public class ShipSprite extends CelestialSprite
 {
     public ShipSprite (Ship ship)
     {
-        super(ScrackController.SHIP_CLICKED, ship.size*SIZE, ship.size*SIZE);
+        super(ScrackController.SHIP_CLICKED, 4*SIZE, ship.size*SIZE);
 
         // render above the planets
         _renderOrder = 1;
@@ -39,9 +39,7 @@ public class ShipSprite extends CelestialSprite
         // if we're changing size, we have to do some jiggering
         if (_ship != null && ship.size != _ship.size) {
             invalidate();
-            _bounds.width = ship.size * SIZE;
             _bounds.height = ship.size * SIZE;
-            _oxoff = _bounds.width/2;
             _oyoff = _bounds.height/2;
         }
         _ship = ship;

@@ -30,10 +30,10 @@ import com.samskivert.scrack.data.Ship;
 /**
  * Displays information on a planet.
  */
-public class PlanetInfoView extends JPanel
+public class InfoView extends JPanel
     implements PlaceView, SetListener, AttributeChangeListener
 {
-    public PlanetInfoView (ToyBoxContext ctx)
+    public InfoView (ToyBoxContext ctx)
     {
         super(new VGroupLayout(VGroupLayout.NONE, VGroupLayout.STRETCH,
                                5, VGroupLayout.TOP));
@@ -42,8 +42,6 @@ public class PlanetInfoView extends JPanel
 
         add(_turn = new JLabel(""));
 
-        add(new JLabel(_msgs.get("m.planet_info")));
-//         add(_name = new JLabel(""));
         add(_owner = new JLabel(""));
         add(_size = new JLabel(""));
         add(_build = new JButton(_msgs.get("m.build_ship")));
@@ -56,22 +54,28 @@ public class PlanetInfoView extends JPanel
     {
         _planet = planet;
         if (_planet == null) {
-//             _name.setText("");
             _owner.setText("");
             _size.setText("");
             _build.setEnabled(false);
         } else {
-//             _name.setText(_msgs.get("m.planet_name", planet.name));
             String owner = _msgs.get("m.planet_unowned");
             if (_planet.owner != -1) {
                 owner = _scrobj.players[_planet.owner].toString();
             }
-            _owner.setText(_msgs.get("m.planet_owner", owner));
-            _size.setText(_msgs.get("m.planet_size", "" + planet.size));
+            _owner.setText(_msgs.get("m.owner", owner));
+            _size.setText(_msgs.get("m.size", "" + planet.size));
             _build.setEnabled(_planet.owner == _selfIdx &&
                               _scrobj.locateShip(_planet.coords) == null &&
                               _scrobj.crack[_selfIdx] >= _planet.size);
         }
+    }
+
+    public void setShip (Ship ship)
+    {
+        String owner = _scrobj.players[ship.owner].toString();
+        _owner.setText(_msgs.get("m.owner", owner));
+        _size.setText(_msgs.get("m.size", "" + ship.size));
+        _build.setEnabled(false);
     }
 
     // documentation inherited from interface PlaceView
@@ -147,6 +151,6 @@ public class PlanetInfoView extends JPanel
     protected Planet _planet;
 
     protected JLabel _turn;
-    protected JLabel _name, _owner, _size;
+    protected JLabel _owner, _size;
     protected JButton _build;
 }
