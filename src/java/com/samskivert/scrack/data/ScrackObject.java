@@ -112,6 +112,22 @@ public class ScrackObject extends GameObject
     }
 
     /**
+     * Returns the size of the smallest planet owned by the specified player or
+     * {@link ScrackCodes#MAX_PLANET_SIZE} if they own no planets.
+     */
+    public int smallestPlanet (int owner)
+    {
+        int smallest = ScrackCodes.MAX_PLANET_SIZE;
+        for (Iterator iter = planets.iterator(); iter.hasNext(); ) {
+            Planet planet = (Planet)iter.next();
+            if (planet.owner == owner && planet.size < smallest) {
+                smallest = planet.size;
+            }
+        }
+        return smallest;
+    }
+
+    /**
      * Returns true if the specified planet is surrounded by friendly planets.
      */
     public boolean isInterior (Planet planet)

@@ -110,11 +110,23 @@ public class ScrackManager extends GameManager
                 _scrobj.removeFromShips(ship.getKey());
                 _scrobj.removeFromShips(target.getKey());
             } else if (ship.size > target.size) {
+                // destroy the defending ship
                 _scrobj.removeFromShips(target.getKey());
+
+                // move onto the planet
                 ship.size -= (target.size/2);
+                ship.coords = planet.coords;
                 _scrobj.updateShips(ship);
+
+                // and assume ownership of it
+                planet.owner = pidx;
+                _scrobj.updatePlanets(planet);
+
             } else {
+                // destroy the attacking ship
                 _scrobj.removeFromShips(ship.getKey());
+
+                // shrink the defender
                 target.size -= (ship.size/2);
                 _scrobj.updateShips(target);
             }
@@ -318,13 +330,17 @@ public class ScrackManager extends GameManager
         if (_scrobj.points[pidx] == 0) {
             _scrobj.setFinishedAt(true, pidx);
         }
+
+        // maybe end the turn due to other wackiness
+        maybeEndTurn();
     }
 
     protected void maybeEndTurn ()
     {
         // make sure everyone is finished with their turn
         for (int ii = 0; ii < _scrobj.finished.length; ii++) {
-            if (!_scrobj.finished[ii]) {
+            if (!_scrobj.finished[ii] && _scrobj.countPlanets(ii) > 0 &&
+                _scrobj.crack[ii] >= _scrobj.smallestPlanet(ii)) {
                 return;
             }
         }

@@ -63,7 +63,7 @@ public abstract class CelestialSprite extends Sprite
 
         // selected overrides hovered
         Color outline = _selected ? Color.white :
-            (_hovered ? Color.blue : Color.darkGray);
+            (_hovered ? Color.lightGray : Color.black);
         gfx.setColor(outline);
         gfx.draw(_shape);
     }
