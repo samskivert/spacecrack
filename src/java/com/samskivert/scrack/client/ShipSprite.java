@@ -45,7 +45,8 @@ public class ShipSprite extends CelestialSprite
         _ship = ship;
 
         // position ourselves based on our ship's coordinates; TODO: animate
-        setLocation(_ship.coords.x * TILE_SIZE, _ship.coords.y * TILE_SIZE);
+        setLocation(_ship.coords.x * TILE_SIZE - TILE_SIZE/2,
+                    _ship.coords.y * TILE_SIZE);
 
         // update our ship shape
         ((Polygon)_shape).reset();

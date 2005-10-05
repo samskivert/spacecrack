@@ -112,6 +112,22 @@ public class ScrackObject extends GameObject
     }
 
     /**
+     * Returns the number of ships owned by the player with the specified
+     * index.
+     */
+    public int countShips (int owner)
+    {
+        int scount = 0;
+        for (Iterator iter = ships.iterator(); iter.hasNext(); ) {
+            Ship ship = (Ship)iter.next();
+            if (ship.owner == owner) {
+                scount++;
+            }
+        }
+        return scount;
+    }
+
+    /**
      * Returns the size of the smallest planet owned by the specified player or
      * {@link ScrackCodes#MAX_PLANET_SIZE} if they own no planets.
      */
@@ -125,6 +141,21 @@ public class ScrackObject extends GameObject
             }
         }
         return smallest;
+    }
+
+    /**
+     * Returns true if the specified player can build on at least one of their
+     * planets.
+     */
+    public boolean canBuild (int owner)
+    {
+        for (Iterator iter = planets.iterator(); iter.hasNext(); ) {
+            Planet planet = (Planet)iter.next();
+            if (planet.owner == owner && crack[owner] >= planet.size) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

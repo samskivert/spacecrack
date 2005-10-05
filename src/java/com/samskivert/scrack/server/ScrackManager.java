@@ -329,18 +329,19 @@ public class ScrackManager extends GameManager
         // if they are out of command points, auto-end their turn for them
         if (_scrobj.points[pidx] == 0) {
             _scrobj.setFinishedAt(true, pidx);
+            // this will trigger a call to maybeEndTurn()
+        } else {
+            // maybe end the turn due to other wackiness
+            maybeEndTurn("useCommandPoint");
         }
-
-        // maybe end the turn due to other wackiness
-        maybeEndTurn();
     }
 
-    protected void maybeEndTurn ()
+    protected void maybeEndTurn (String where)
     {
         // make sure everyone is finished with their turn
         for (int ii = 0; ii < _scrobj.finished.length; ii++) {
-            if (!_scrobj.finished[ii] && _scrobj.countPlanets(ii) > 0 &&
-                _scrobj.crack[ii] >= _scrobj.smallestPlanet(ii)) {
+            if (!_scrobj.finished[ii] &&
+                (_scrobj.canBuild(ii) || _scrobj.countShips(ii) > 0)) {
                 return;
             }
         }
@@ -384,7 +385,7 @@ public class ScrackManager extends GameManager
     protected ElementUpdateListener _turnEnder = new ElementUpdateListener() {
         public void elementUpdated (ElementUpdatedEvent event) {
             if (event.getName().equals(ScrackObject.FINISHED)) {
-                maybeEndTurn();
+                maybeEndTurn("finishedUpdated");
             }
         }
     };

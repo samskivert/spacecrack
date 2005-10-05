@@ -3,10 +3,16 @@
 
 package com.samskivert.scrack.client;
 
+import java.util.Iterator;
+
 import com.threerings.crowd.client.PlaceView;
+import com.threerings.crowd.data.PlaceObject;
 import com.threerings.crowd.util.CrowdContext;
 
+import com.threerings.presents.dobj.AttributeChangedEvent;
+
 import com.threerings.parlor.game.client.GameController;
+
 import com.threerings.toybox.data.ToyBoxGameConfig;
 import com.threerings.toybox.util.ToyBoxContext;
 
@@ -31,6 +37,9 @@ public class ScrackController extends GameController
 
     /** A command posted by a ship when it is clicked. */
     public static final String SHIP_CLICKED = "ShipClicked";
+
+    /** A command posted when the player clicks on the blank board. */
+    public static final String NOTHING_CLICKED = "NothingClicked";
 
     /** A command posted when the player wants to build a ship at the selected
      * planet. */
@@ -64,7 +73,7 @@ public class ScrackController extends GameController
             if (cplanet != null && cplanet.isNeighbor(planet)) {
                 _scrobj.service.moveShip(
                     _ctx.getClient(), ship.shipId, planet.planetId);
-                clearSelection();
+                // leave the ship selected to make subsequent moves easier
                 return;
             }
         }
@@ -105,6 +114,15 @@ public class ScrackController extends GameController
     }
 
     /**
+     * This method is called when the player clicks on the background of the
+     * board (anywhere that is not a ship or a planet).
+     */
+    public void handleNothingClicked (Object source)
+    {
+        clearSelection();
+    }
+
+    /**
      * Requests that we build a ship at the selected planet.
      */
     public void handleBuildShip (Object source)
@@ -116,12 +134,52 @@ public class ScrackController extends GameController
     }
 
     @Override // documentation inherited
+    public void willEnterPlace (PlaceObject plobj)
+    {
+        super.willEnterPlace(plobj);
+
+        _scrobj = (ScrackObject)plobj;
+        _selfIdx = _scrobj.getPlayerIndex(_ctx.getUsername());
+    }
+
+    @Override // documentation inherited
+    public void attributeChanged (AttributeChangedEvent event)
+    {
+        super.attributeChanged(event);
+
+        if (event.getName().equals(ScrackObject.TURNS_LEFT)) {
+            // nothing to do the first time around
+            if (_scrobj.planets == null) {
+                return;
+            }
+
+            // animate our player's crack scoring
+            for (Iterator iter = _scrobj.planets.iterator(); iter.hasNext(); ) {
+                Planet planet = (Planet)iter.next();
+                if (planet.owner == _selfIdx) {
+                    float efficiency = _efficiency;
+                    if (_scrobj.isInterior(planet)) {
+                        efficiency += _interiorBonus;
+                    }
+                    int crack = (int)Math.round(efficiency * planet.size);
+                    _panel.view.animateCrackScore(planet, crack);
+                }
+            }
+        }
+    }
+
+    @Override // documentation inherited
     protected void didInit ()
     {
         super.didInit();
 
         // cast our context
         _ctx = (ToyBoxContext)super._ctx;
+
+        // grab some configuration parameters
+        ToyBoxGameConfig config = (ToyBoxGameConfig)_config;
+        _efficiency = (Integer)config.params.get("crack_pct")/100f;
+        _interiorBonus = (Integer)config.params.get("interior_bonus")/100f;
     }
 
     @Override // documentation inherited
@@ -136,17 +194,8 @@ public class ScrackController extends GameController
     protected void gameDidStart ()
     {
         super.gameDidStart();
-        _scrobj = (ScrackObject)_gobj;
-        _selfIdx = _scrobj.getPlayerIndex(_ctx.getUsername());
         _panel.view.gameDidStart();
     }
-
-//     @Override // documentation inherited
-//     protected void gameDidEnd ()
-//     {
-//         super.gameDidEnd();
-//         _panel.displayStatus("m.game_over");
-//     }
 
     protected void clearSelection ()
     {
@@ -174,4 +223,6 @@ public class ScrackController extends GameController
     /** Contains our selection; either a {@link PlanetSprite} or a {@link
      * ShipSprite}. */
     protected CelestialSprite _selection;
+
+    protected float _efficiency, _interiorBonus;
 }
