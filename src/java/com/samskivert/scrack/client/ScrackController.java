@@ -67,8 +67,7 @@ public class ScrackController extends GameController
             Ship ship = ((ShipSprite)_selection).getShip();
             Planet planet = psprite.getPlanet();
 
-            // make sure this planet is a neighbor to the planet the ship
-            // currently occupies
+            // make sure this planet is a neighbor to the planet the ship currently occupies
             Planet cplanet = _scrobj.locatePlanet(ship.coords);
             if (cplanet != null && cplanet.isNeighbor(planet)) {
                 _scrobj.service.moveShip(ship.shipId, planet.planetId);
@@ -184,8 +183,7 @@ public class ScrackController extends GameController
     @Override // documentation inherited
     protected PlaceView createPlaceView (CrowdContext ctx)
     {
-        _panel = new ScrackPanel(
-            (ToyBoxContext)ctx, (ToyBoxGameConfig)_config, this);
+        _panel = new ScrackPanel((ToyBoxContext)ctx, (ToyBoxGameConfig)_config, this);
         return _panel;
     }
 
@@ -219,8 +217,7 @@ public class ScrackController extends GameController
     /** Our game panel. */
     protected ScrackPanel _panel;
 
-    /** Contains our selection; either a {@link PlanetSprite} or a {@link
-     * ShipSprite}. */
+    /** Contains our selection; either a {@link PlanetSprite} or a {@link ShipSprite}. */
     protected CelestialSprite _selection;
 
     protected float _efficiency, _interiorBonus;
