@@ -3,6 +3,8 @@ Space Crack
 
 Compete to win the most planets with your armada of ships.
 
+This is a game written for [Game Gardens], you can [play it there].
+
 Instructions
 ------------
 
@@ -69,3 +71,6 @@ Credits
 Design: Copyright (c) 2005 Daniel Cook 
 
 Code: Copyright (c) 2005 Michael Bayne
+
+[Game Gardens]: http://www.gamegardens.com/
+[play it there]: http://www.gamegardens.com/gardens/view_game.wm?gameid=26
