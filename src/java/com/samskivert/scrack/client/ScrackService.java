@@ -16,10 +16,10 @@ public interface ScrackService extends InvocationService
     /**
      * Requests to move the specified ship to the specified destination planet.
      */
-    public void moveShip (Client client, int shipId, int planetId);
+    public void moveShip (int shipId, int planetId);
 
     /**
      * Requests to build a ship on the specified planet.
      */
-    public void buildShip (Client client, int planetId);
+    public void buildShip (int planetId);
 }

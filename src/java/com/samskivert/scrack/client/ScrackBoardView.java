@@ -4,6 +4,7 @@
 package com.samskivert.scrack.client;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -82,19 +83,18 @@ public class ScrackBoardView extends VirtualMediaPanel
 
         // compute our neighbor information and convert the edges to a rapidly
         // renderable set of lines
-        HashSet<Tuple> edges = new HashSet<Tuple>();
-        for (Iterator iter = _scrobj.planets.iterator(); iter.hasNext(); ) {
-            Planet p = (Planet)iter.next();
+        HashSet<Tuple<Integer,Integer>> edges = new HashSet<Tuple<Integer,Integer>>();
+        for (Planet p : _scrobj.planets) {
             for (int ii = 0; ii < p.neighbors.length; ii++) {
-                edges.add(new Tuple(p.planetId, p.neighbors[ii]));
+                edges.add(Tuple.newTuple(p.planetId, p.neighbors[ii]));
             }
         }
         _edges = new Line2D[edges.size()];
         System.err.println("Created " + _edges.length + " edges.");
         int eidx = 0;
-        for (Tuple edge : edges) {
-            Planet p1 = (Planet)_scrobj.planets.get((Integer)edge.left);
-            Planet p2 = (Planet)_scrobj.planets.get((Integer)edge.right);
+        for (Tuple<Integer,Integer> edge : edges) {
+            Planet p1 = _scrobj.planets.get(edge.left);
+            Planet p2 = _scrobj.planets.get(edge.right);
             _edges[eidx++] = new Line2D.Float(
                 p1.coords.x * TILE_SIZE, p1.coords.y * TILE_SIZE,
                 p2.coords.x * TILE_SIZE, p2.coords.y * TILE_SIZE);
@@ -117,7 +117,7 @@ public class ScrackBoardView extends VirtualMediaPanel
     public void animateCrackScore (Planet planet, int crack)
     {
         Label label = ScoreAnimation.createLabel(
-            "+" + crack, Color.white, _scoreFont, this);
+            "+" + crack, Color.white, _scoreFont, (Component)this);
         int cx = planet.coords.x * TILE_SIZE, cy = planet.coords.y * TILE_SIZE;
         addAnimation(new ScoreAnimation(label, cx, cy));
     }
@@ -174,9 +174,8 @@ public class ScrackBoardView extends VirtualMediaPanel
     public void doLayout ()
     {
         super.doLayout();
-        _crack = ScoreAnimation.createLabel(" ", Color.white, _scoreFont, this);
-        _points = ScoreAnimation.createLabel(
-            " ", Color.white, _scoreFont, this);
+        _crack = ScoreAnimation.createLabel(" ", Color.white, _scoreFont, (Component)this);
+        _points = ScoreAnimation.createLabel(" ", Color.white, _scoreFont, (Component)this);
     }
 
     @Override // documentation inherited

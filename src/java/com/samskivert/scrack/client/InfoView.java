@@ -116,8 +116,8 @@ public class InfoView extends JPanel
             _planet.planetId == ((Planet)event.getEntry()).planetId) {
             setPlanet((Planet)event.getEntry());
         } else if (event.getName().equals(ScrackObject.SHIPS) &&
-                   ((Ship)event.getOldEntry()).coords.equals(_planet.coords) ||
-                   ((Ship)event.getEntry()).coords.equals(_planet.coords)) {
+                   (((Ship)event.getOldEntry()).coords.equals(_planet.coords) ||
+                    ((Ship)event.getEntry()).coords.equals(_planet.coords))) {
             setPlanet(_planet);
         }
     }

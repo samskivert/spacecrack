@@ -71,8 +71,7 @@ public class ScrackController extends GameController
             // currently occupies
             Planet cplanet = _scrobj.locatePlanet(ship.coords);
             if (cplanet != null && cplanet.isNeighbor(planet)) {
-                _scrobj.service.moveShip(
-                    _ctx.getClient(), ship.shipId, planet.planetId);
+                _scrobj.service.moveShip(ship.shipId, planet.planetId);
                 // leave the ship selected to make subsequent moves easier
                 return;
             }
@@ -129,7 +128,7 @@ public class ScrackController extends GameController
     {
         if (_selection instanceof PlanetSprite) {
             Planet planet = ((PlanetSprite)_selection).getPlanet();
-            _scrobj.service.buildShip(_ctx.getClient(), planet.planetId);
+            _scrobj.service.buildShip(planet.planetId);
         }
     }
 
@@ -161,7 +160,7 @@ public class ScrackController extends GameController
                     if (_scrobj.isInterior(planet)) {
                         efficiency += _interiorBonus;
                     }
-                    int crack = (int)Math.round(efficiency * planet.size);
+                    int crack = Math.round(efficiency * planet.size);
                     _panel.view.animateCrackScore(planet, crack);
                 }
             }

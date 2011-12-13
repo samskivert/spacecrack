@@ -1,5 +1,5 @@
 <!-- build configuration -->
-<project name="scrack" default="compile" basedir=".">
+<project name="scrack" default="compile" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
   <!-- things you may want to change -->
   <property name="app.name"         value="scrack"/>
@@ -12,49 +12,13 @@
   <property name="dist.jar"     value="${app.name}.jar"/>
   <property name="javadoc.dir"  value="${deploy.dir}/docs"/>
 
-  <!-- declare our classpath -->
-  <path id="classpath">
-    <fileset dir="../lib" includes="**/*.jar"/>
-    <pathelement location="${deploy.dir}/classes"/>
-  </path>
-
-  <!-- generates additional methods for distributed object classes -->
-  <target name="gendobj" depends="prepare">
-    <taskdef name="dobj"
-             classname="com.threerings.presents.tools.GenDObjectTask"
-             classpathref="classpath"/>
-    <!-- make sure the dobject class files are all compiled -->
-    <javac srcdir="src/java" destdir="${deploy.dir}/classes"
-           debug="on" optimize="${build.optimize}" deprecation="on">
-      <classpath refid="classpath"/>
-      <include name="**/*Object.java"/>
-    </javac>
-    <!-- now generate the associated files -->
-    <dobj classpathref="classpath">
-      <fileset dir="src/java" includes="**/*Object.java"/>
-    </dobj>
-  </target>
-
-  <!-- generates marshaller and dispatcher classes for all invocation -->
-  <!-- service declarations -->
-  <target name="genservice"> 
-    <taskdef name="service"
-             classname="com.threerings.presents.tools.GenServiceTask"
-             classpathref="classpath"/>
-    <!-- make sure the service class files are all compiled -->
-    <javac srcdir="src/java" destdir="${deploy.dir}/classes"
-           debug="on" optimize="${build.optimize}" deprecation="on">
-      <classpath refid="classpath"/>
-      <include name="**/*Service.java"/>
-    </javac>
-    <!-- now generate the associated files -->
-    <service header="lib/SOURCE_HEADER" classpathref="classpath">
-      <fileset dir="src/java" includes="**/*Service.java"/>
-    </service>
-  </target>
+  <!-- bring in some build bits -->
+  <property name="ooo-build.vers" value="2.9"/>
+  <ant antfile="etc/bootstrap.xml"/>
+  <import file="${user.home}/.m2/ooo-build/${ooo-build.vers}/ooo-build.xml"/>
 
   <!-- prepares the application directories -->
-  <target name="prepare">
+  <target name="-prepare" depends="-init-ooo">
     <mkdir dir="${deploy.dir}"/>
     <mkdir dir="${deploy.dir}/classes"/>
     <mkdir dir="${deploy.dir}/classes/rsrc"/>
@@ -65,6 +29,46 @@
     <copy todir="${deploy.dir}/classes/rsrc">
       <fileset dir="rsrc" includes="**/*"/>
     </copy>
+
+    <!-- declare our classpath -->
+    <artifact:dependencies pathId="mvn.classpath">
+      <dependency groupId="com.threerings" artifactId="toybox" version="1.1-SNAPSHOT"/>
+    </artifact:dependencies>
+    <path id="classpath">
+      <path refid="mvn.classpath"/>
+      <pathelement location="${deploy.dir}/classes"/>
+    </path>
+  </target>
+
+  <target name="-preptools" depends="-prepare">
+    <artifact:dependencies pathId="tools.classpath">
+      <dependency groupId="com.threerings" artifactId="narya-tools" version="1.9"/>
+    </artifact:dependencies>
+    <taskdef resource="com/threerings/presents/tools.properties" classpathref="tools.classpath"/>
+  </target>
+
+  <!-- generates additional methods for distributed object classes -->
+  <target name="gendobj" depends="-preptools">
+    <!-- make sure the dobject class files are all compiled -->
+    <ooojavac srcdir="${src.dir}" destdir="${deploy.dir}/classes" classpathref="classpath">
+      <include name="**/*Object.java"/>
+    </ooojavac>
+    <!-- now generate the associated files -->
+    <gendobj classpathref="classpath">
+      <fileset dir="${src.dir}" includes="**/*Object.java"/>
+    </gendobj>
+  </target>
+
+  <!-- generates marshaller and dispatcher classes for all invocation service declarations -->
+  <target name="genservice" depends="-preptools"> 
+    <!-- make sure the service class files are all compiled -->
+    <ooojavac srcdir="${src.dir}" destdir="${deploy.dir}/classes" classpathref="classpath">
+      <include name="**/*Service.java"/>
+    </ooojavac>
+    <!-- now generate the associated files -->
+    <genservice header="etc/SOURCE_HEADER" classpathref="classpath">
+      <fileset dir="${src.dir}" includes="**/*Service.java"/>
+    </genservice>
   </target>
 
   <!-- cleans out the installed application -->
@@ -73,16 +77,13 @@
   </target>
 
   <!-- build the java class files -->
-  <target name="compile" depends="prepare">
-    <javac srcdir="${src.dir}" destdir="${deploy.dir}/classes"
-           debug="on" optimize="off" deprecation="on">
-      <classpath refid="classpath"/>
-      <compilerarg value="-Xlint:unchecked"/>
-    </javac>
+  <target name="compile" depends="-prepare">
+    <ooojavac srcdir="${src.dir}" destdir="${deploy.dir}/classes" version="1.6"
+              classpathref="classpath"/>
   </target>
 
   <!-- build the javadoc documentation -->
-  <target name="javadoc" depends="prepare">
+  <target name="javadoc" depends="-prepare">
     <javadoc sourcepath="${src.dir}"
              packagenames="${doc.packages}"
              windowtitle="${app.name} API"
@@ -96,24 +97,21 @@
   </target>
 
   <!-- a target for rebuilding everything -->
-  <target name="all" depends="clean,prepare,compile,javadoc,dist"/>
+  <target name="all" depends="clean,compile,javadoc,dist"/>
 
   <!-- builds our distribution files (war and jar) -->
-  <target name="dist" depends="prepare,compile">
+  <target name="dist" depends="compile">
     <jar file="${deploy.dir}/${dist.jar}"
          basedir="${deploy.dir}/classes"/>
   </target>
 
   <!-- a target for running a game client -->
-  <target name="client">
+  <target name="client" depends="compile">
     <fail unless="username">
       Please specify a username: ant -Dusername=who client
     </fail>
     <java classname="com.threerings.toybox.client.ToyBoxApp" fork="true">
-      <classpath>
-        <pathelement location="${deploy.dir}/classes"/>
-        <pathelement location="../client/gg-client.jar"/>
-      </classpath>
+      <classpath refid="classpath"/>
       <sysproperty key="no_log_redir" value="true"/>
       <arg value="localhost"/>
       <arg value="47624"/>
@@ -123,7 +121,7 @@
   </target>
 
   <!-- a target for running the game server -->
-  <target name="server">
+  <target name="server" depends="compile">
     <propertyfile file="${deploy.dir}/classes/toybox.properties">
       <entry key="resource_dir" value="dist"/>
       <entry key="resource_url" value="file://dist"/>

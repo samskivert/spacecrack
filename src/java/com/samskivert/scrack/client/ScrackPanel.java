@@ -73,7 +73,6 @@ public class ScrackPanel extends PlacePanel
 
         // add a big fat label because we love it!
         MultiLineLabel vlabel = new MultiLineLabel(msgs.get("m.title"));
-        vlabel.setAntiAliased(true);
         vlabel.setFont(ToyBoxUI.fancyFont);
         sidePanel.add(vlabel, VGroupLayout.FIXED);
 
@@ -97,9 +96,7 @@ public class ScrackPanel extends PlacePanel
         setBackground(new Color(0xDAEB9C));
 
         // add a chat box
-        ChatPanel chat = new ChatPanel(ctx);
-        chat.removeSendButton();
-        sidePanel.add(chat);
+        sidePanel.add(new ChatPanel(ctx, false));
 
         // add a "back" button
         JButton back = new JButton(msgs.get("m.back_to_lobby"));

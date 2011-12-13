@@ -9,15 +9,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.threerings.util.RandomUtil;
+import com.samskivert.util.RandomUtil;
 
 import com.threerings.presents.data.ClientObject;
 import com.threerings.presents.dobj.DSet;
 import com.threerings.presents.dobj.ElementUpdateListener;
 import com.threerings.presents.dobj.ElementUpdatedEvent;
-import com.threerings.presents.server.PresentsServer;
 
 import com.threerings.crowd.data.BodyObject;
+import com.threerings.crowd.data.PlaceObject;
 
 import com.threerings.parlor.game.server.GameManager;
 import com.threerings.toybox.data.ToyBoxGameConfig;
@@ -32,6 +32,7 @@ import com.samskivert.util.ArrayIntSet;
 
 import static com.samskivert.scrack.Log.log;
 import static com.samskivert.scrack.data.ScrackCodes.*;
+import com.samskivert.scrack.data.ScrackMarshaller;
 
 /**
  * Manages the server side of the game.
@@ -45,7 +46,7 @@ public class ScrackManager extends GameManager
         BodyObject user = (BodyObject)caller;
         int pidx = getPlayerIndex(user.username);
 
-        Ship ship = (Ship)_scrobj.ships.get(shipId);
+        Ship ship = _scrobj.ships.get(shipId);
         if (ship == null || ship.owner != pidx) {
             log.warning("Requested to move bogus ship [game=" + where() +
                         ", who=" + user.who() + ", shipId=" + shipId +
@@ -53,7 +54,7 @@ public class ScrackManager extends GameManager
             return;
         }
 
-        Planet planet = (Planet)_scrobj.planets.get(planetId);
+        Planet planet = _scrobj.planets.get(planetId);
         if (planet == null) {
             log.warning("Requested to move to non-existent planet " +
                         "[game=" + where() + ", who=" + user.who() +
@@ -143,7 +144,7 @@ public class ScrackManager extends GameManager
         BodyObject user = (BodyObject)caller;
         int pidx = getPlayerIndex(user.username);
 
-        Planet planet = (Planet)_scrobj.planets.get(planetId);
+        Planet planet = _scrobj.planets.get(planetId);
         if (planet == null || planet.owner != pidx) {
             log.warning("Requested to build ship on invalid planet " +
                         "[game=" + where() + ", who=" + user.who() +
@@ -175,9 +176,9 @@ public class ScrackManager extends GameManager
     }
 
     @Override // documentation inherited
-    protected Class getPlaceObjectClass ()
+    protected PlaceObject createPlaceObject ()
     {
-        return ScrackObject.class;
+        return new ScrackObject();
     }
 
     @Override // documentation inherited
@@ -187,9 +188,7 @@ public class ScrackManager extends GameManager
 
         // grab and set up our game object
         _scrobj = (ScrackObject)_gameobj;
-        _scrobj.setService(
-            (ScrackMarshaller)PresentsServer.invmgr.registerDispatcher(
-                new ScrackDispatcher(this), false));
+        _scrobj.setService(_invmgr.registerProvider(this, ScrackMarshaller.class));
         _scrobj.addListener(_turnEnder);
 
         // fill in blank defaults for our game data
@@ -269,7 +268,7 @@ public class ScrackManager extends GameManager
             if (planet.owner == -1) {
                 // select one of our (unowned) neighbors at random and give
                 // them one of our size points
-                Planet n = (Planet)RandomUtil.pickRandom(nlist);
+                Planet n = RandomUtil.pickRandom(nlist);
                 n.size += 1;
                 planet.size -= 1;
             }
@@ -279,14 +278,14 @@ public class ScrackManager extends GameManager
         }
 
         // publish this list of planets in the game object
-        _scrobj.setPlanets(new DSet(planets.values().iterator()));
+        _scrobj.setPlanets(new DSet<Planet>(planets.values().iterator()));
 
         // create a ship at each player's starting planet
         HashSet<Ship> ships = new HashSet<Ship>();
         for (int ii = 0; ii < getPlayerCount(); ii++) {
             ships.add(new Ship(sx[ii], sy[ii], MIN_PLANET_SIZE+1, ii));
         }
-        _scrobj.setShips(new DSet(ships.iterator()));
+        _scrobj.setShips(new DSet<Ship>(ships.iterator()));
     }
 
     @Override // documentation inherited

@@ -5,7 +5,7 @@ package com.samskivert.scrack.data;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import javax.annotation.Generated;
 
 import com.samskivert.util.ArrayIntSet;
 import com.samskivert.util.Tuple;
@@ -22,24 +22,31 @@ public class ScrackObject extends GameObject
 {
     // AUTO-GENERATED: FIELDS START
     /** The field name of the <code>service</code> field. */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public static final String SERVICE = "service";
 
     /** The field name of the <code>turnsLeft</code> field. */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public static final String TURNS_LEFT = "turnsLeft";
 
     /** The field name of the <code>planets</code> field. */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public static final String PLANETS = "planets";
 
     /** The field name of the <code>ships</code> field. */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public static final String SHIPS = "ships";
 
     /** The field name of the <code>crack</code> field. */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public static final String CRACK = "crack";
 
     /** The field name of the <code>points</code> field. */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public static final String POINTS = "points";
 
     /** The field name of the <code>finished</code> field. */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public static final String FINISHED = "finished";
     // AUTO-GENERATED: FIELDS END
 
@@ -51,10 +58,10 @@ public class ScrackObject extends GameObject
     public int turnsLeft;
 
     /** Contains all of the planets in the game. */
-    public DSet planets = new DSet();
+    public DSet<Planet> planets = new DSet<Planet>();
 
     /** Contains all of the ships in play. */
-    public DSet ships = new DSet();
+    public DSet<Ship> ships = new DSet<Ship>();
 
     /** Contains the quantity of crack possessed by each player. */
     public int[] crack;
@@ -71,8 +78,7 @@ public class ScrackObject extends GameObject
      */
     public Ship locateShip (Coords coords)
     {
-        for (Iterator iter = ships.iterator(); iter.hasNext(); ) {
-            Ship ship = (Ship)iter.next();
+        for (Ship ship : ships) {
             if (ship.coords.equals(coords)) {
                 return ship;
             }
@@ -86,8 +92,7 @@ public class ScrackObject extends GameObject
      */
     public Planet locatePlanet (Coords coords)
     {
-        for (Iterator iter = planets.iterator(); iter.hasNext(); ) {
-            Planet planet = (Planet)iter.next();
+        for (Planet planet : planets) {
             if (planet.coords.equals(coords)) {
                 return planet;
             }
@@ -102,8 +107,7 @@ public class ScrackObject extends GameObject
     public int countPlanets (int owner)
     {
         int pcount = 0;
-        for (Iterator iter = planets.iterator(); iter.hasNext(); ) {
-            Planet planet = (Planet)iter.next();
+        for (Planet planet : planets) {
             if (planet.owner == owner) {
                 pcount++;
             }
@@ -118,8 +122,7 @@ public class ScrackObject extends GameObject
     public int countShips (int owner)
     {
         int scount = 0;
-        for (Iterator iter = ships.iterator(); iter.hasNext(); ) {
-            Ship ship = (Ship)iter.next();
+        for (Ship ship : ships) {
             if (ship.owner == owner) {
                 scount++;
             }
@@ -134,8 +137,7 @@ public class ScrackObject extends GameObject
     public int smallestPlanet (int owner)
     {
         int smallest = ScrackCodes.MAX_PLANET_SIZE;
-        for (Iterator iter = planets.iterator(); iter.hasNext(); ) {
-            Planet planet = (Planet)iter.next();
+        for (Planet planet : planets) {
             if (planet.owner == owner && planet.size < smallest) {
                 smallest = planet.size;
             }
@@ -149,8 +151,7 @@ public class ScrackObject extends GameObject
      */
     public boolean canBuild (int owner)
     {
-        for (Iterator iter = planets.iterator(); iter.hasNext(); ) {
-            Planet planet = (Planet)iter.next();
+        for (Planet planet : planets) {
             if (planet.owner == owner && crack[owner] >= planet.size) {
                 return true;
             }
@@ -164,7 +165,7 @@ public class ScrackObject extends GameObject
     public boolean isInterior (Planet planet)
     {
         for (int ii = 0; ii < planet.neighbors.length; ii++) {
-            Planet n = (Planet)planets.get(planet.neighbors[ii]);
+            Planet n = planets.get(planet.neighbors[ii]);
             if (n.owner != planet.owner) {
                 return false;
             }
@@ -172,6 +173,9 @@ public class ScrackObject extends GameObject
         // must not be on the edge of the board
         return (planet.neighbors.length == 6);
     }
+
+    protected transient HashMap<Integer,ArrayIntSet> _neighbors =
+        new HashMap<Integer,ArrayIntSet>();
 
     // AUTO-GENERATED: METHODS START
     /**
@@ -182,6 +186,7 @@ public class ScrackObject extends GameObject
      * clients) will apply the value change when they received the
      * attribute changed notification.
      */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public void setService (ScrackMarshaller value)
     {
         ScrackMarshaller ovalue = this.service;
@@ -198,11 +203,12 @@ public class ScrackObject extends GameObject
      * clients) will apply the value change when they received the
      * attribute changed notification.
      */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public void setTurnsLeft (int value)
     {
         int ovalue = this.turnsLeft;
         requestAttributeChange(
-            TURNS_LEFT, new Integer(value), new Integer(ovalue));
+            TURNS_LEFT, Integer.valueOf(value), Integer.valueOf(ovalue));
         this.turnsLeft = value;
     }
 
@@ -211,7 +217,8 @@ public class ScrackObject extends GameObject
      * <code>planets</code> set. The set will not change until the event is
      * actually propagated through the system.
      */
-    public void addToPlanets (DSet.Entry elem)
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
+    public void addToPlanets (Planet elem)
     {
         requestEntryAdd(PLANETS, planets, elem);
     }
@@ -221,7 +228,8 @@ public class ScrackObject extends GameObject
      * the <code>planets</code> set. The set will not change until the
      * event is actually propagated through the system.
      */
-    public void removeFromPlanets (Comparable key)
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
+    public void removeFromPlanets (Comparable<?> key)
     {
         requestEntryRemove(PLANETS, planets, key);
     }
@@ -231,7 +239,8 @@ public class ScrackObject extends GameObject
      * <code>planets</code> set. The set will not change until the event is
      * actually propagated through the system.
      */
-    public void updatePlanets (DSet.Entry elem)
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
+    public void updatePlanets (Planet elem)
     {
         requestEntryUpdate(PLANETS, planets, elem);
     }
@@ -246,10 +255,12 @@ public class ScrackObject extends GameObject
      * change. Proxied copies of this object (on clients) will apply the
      * value change when they received the attribute changed notification.
      */
-    public void setPlanets (DSet value)
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
+    public void setPlanets (DSet<Planet> value)
     {
         requestAttributeChange(PLANETS, value, this.planets);
-        this.planets = (value == null) ? null : (DSet)value.clone();
+        DSet<Planet> clone = (value == null) ? null : value.clone();
+        this.planets = clone;
     }
 
     /**
@@ -257,7 +268,8 @@ public class ScrackObject extends GameObject
      * <code>ships</code> set. The set will not change until the event is
      * actually propagated through the system.
      */
-    public void addToShips (DSet.Entry elem)
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
+    public void addToShips (Ship elem)
     {
         requestEntryAdd(SHIPS, ships, elem);
     }
@@ -267,7 +279,8 @@ public class ScrackObject extends GameObject
      * the <code>ships</code> set. The set will not change until the
      * event is actually propagated through the system.
      */
-    public void removeFromShips (Comparable key)
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
+    public void removeFromShips (Comparable<?> key)
     {
         requestEntryRemove(SHIPS, ships, key);
     }
@@ -277,7 +290,8 @@ public class ScrackObject extends GameObject
      * <code>ships</code> set. The set will not change until the event is
      * actually propagated through the system.
      */
-    public void updateShips (DSet.Entry elem)
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
+    public void updateShips (Ship elem)
     {
         requestEntryUpdate(SHIPS, ships, elem);
     }
@@ -292,10 +306,12 @@ public class ScrackObject extends GameObject
      * change. Proxied copies of this object (on clients) will apply the
      * value change when they received the attribute changed notification.
      */
-    public void setShips (DSet value)
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
+    public void setShips (DSet<Ship> value)
     {
         requestAttributeChange(SHIPS, value, this.ships);
-        this.ships = (value == null) ? null : (DSet)value.clone();
+        DSet<Ship> clone = (value == null) ? null : value.clone();
+        this.ships = clone;
     }
 
     /**
@@ -306,12 +322,13 @@ public class ScrackObject extends GameObject
      * clients) will apply the value change when they received the
      * attribute changed notification.
      */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public void setCrack (int[] value)
     {
         int[] ovalue = this.crack;
         requestAttributeChange(
             CRACK, value, ovalue);
-        this.crack = (value == null) ? null : (int[])value.clone();
+        this.crack = (value == null) ? null : value.clone();
     }
 
     /**
@@ -323,11 +340,12 @@ public class ScrackObject extends GameObject
      * will apply the value change when they received the attribute
      * changed notification.
      */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public void setCrackAt (int value, int index)
     {
         int ovalue = this.crack[index];
         requestElementUpdate(
-            CRACK, index, new Integer(value), new Integer(ovalue));
+            CRACK, index, Integer.valueOf(value), Integer.valueOf(ovalue));
         this.crack[index] = value;
     }
 
@@ -339,12 +357,13 @@ public class ScrackObject extends GameObject
      * clients) will apply the value change when they received the
      * attribute changed notification.
      */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public void setPoints (int[] value)
     {
         int[] ovalue = this.points;
         requestAttributeChange(
             POINTS, value, ovalue);
-        this.points = (value == null) ? null : (int[])value.clone();
+        this.points = (value == null) ? null : value.clone();
     }
 
     /**
@@ -356,11 +375,12 @@ public class ScrackObject extends GameObject
      * will apply the value change when they received the attribute
      * changed notification.
      */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public void setPointsAt (int value, int index)
     {
         int ovalue = this.points[index];
         requestElementUpdate(
-            POINTS, index, new Integer(value), new Integer(ovalue));
+            POINTS, index, Integer.valueOf(value), Integer.valueOf(ovalue));
         this.points[index] = value;
     }
 
@@ -372,12 +392,13 @@ public class ScrackObject extends GameObject
      * clients) will apply the value change when they received the
      * attribute changed notification.
      */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public void setFinished (boolean[] value)
     {
         boolean[] ovalue = this.finished;
         requestAttributeChange(
             FINISHED, value, ovalue);
-        this.finished = (value == null) ? null : (boolean[])value.clone();
+        this.finished = (value == null) ? null : value.clone();
     }
 
     /**
@@ -389,15 +410,13 @@ public class ScrackObject extends GameObject
      * will apply the value change when they received the attribute
      * changed notification.
      */
+    @Generated(value={"com.threerings.presents.tools.GenDObjectTask"})
     public void setFinishedAt (boolean value, int index)
     {
         boolean ovalue = this.finished[index];
         requestElementUpdate(
-            FINISHED, index, new Boolean(value), new Boolean(ovalue));
+            FINISHED, index, Boolean.valueOf(value), Boolean.valueOf(ovalue));
         this.finished[index] = value;
     }
     // AUTO-GENERATED: METHODS END
-
-    protected transient HashMap<Integer,ArrayIntSet> _neighbors =
-        new HashMap<Integer,ArrayIntSet>();
 }

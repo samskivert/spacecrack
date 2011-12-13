@@ -3,10 +3,11 @@
 
 package com.samskivert.scrack.data;
 
+import javax.annotation.Generated;
+
 import com.samskivert.scrack.client.ScrackService;
-import com.threerings.presents.client.Client;
+
 import com.threerings.presents.data.InvocationMarshaller;
-import com.threerings.presents.dobj.InvocationResponseEvent;
 
 /**
  * Provides the implementation of the {@link ScrackService} interface
@@ -15,29 +16,30 @@ import com.threerings.presents.dobj.InvocationResponseEvent;
  * interfaces that marshall the response arguments and deliver them back
  * to the requesting client.
  */
+@Generated(value={"com.threerings.presents.tools.GenServiceTask"},
+           comments="Derived from ScrackService.java.")
 public class ScrackMarshaller extends InvocationMarshaller
     implements ScrackService
 {
     /** The method id used to dispatch {@link #buildShip} requests. */
     public static final int BUILD_SHIP = 1;
 
-    // documentation inherited from interface
-    public void buildShip (Client arg1, int arg2)
+    // from interface ScrackService
+    public void buildShip (int arg1)
     {
-        sendRequest(arg1, BUILD_SHIP, new Object[] {
-            new Integer(arg2)
+        sendRequest(BUILD_SHIP, new Object[] {
+            Integer.valueOf(arg1)
         });
     }
 
     /** The method id used to dispatch {@link #moveShip} requests. */
     public static final int MOVE_SHIP = 2;
 
-    // documentation inherited from interface
-    public void moveShip (Client arg1, int arg2, int arg3)
+    // from interface ScrackService
+    public void moveShip (int arg1, int arg2)
     {
-        sendRequest(arg1, MOVE_SHIP, new Object[] {
-            new Integer(arg2), new Integer(arg3)
+        sendRequest(MOVE_SHIP, new Object[] {
+            Integer.valueOf(arg1), Integer.valueOf(arg2)
         });
     }
-
 }
